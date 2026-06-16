@@ -82,35 +82,40 @@ class RVCr2(VoiceChangerModel):
             return
 
         # 処理は16Kで実施(Pitch, embed, (infer))
+        # 优化：在 macOS (MPS) 下，GPU 上的一维重采样卷积算子性能极差，会严重阻塞 GPU 指令队列。
+        # 将重采样强制保留在 CPU 上运行。
+        resample_device = torch.device('cpu') if self.device_manager.device.type == 'mps' else self.device_manager.device
+
         self.resampler_in = tat.Resample(
             orig_freq=self.input_sample_rate,
             new_freq=HUBERT_SAMPLE_RATE,
             dtype=torch.float32
-        ).to(self.device_manager.device)
+        ).to(resample_device)
 
         self.resampler_out = tat.Resample(
             orig_freq=self.slotInfo.samplingRate,
             new_freq=self.output_sample_rate,
             dtype=torch.float32
-        ).to(self.device_manager.device)
+        ).to(resample_device)
 
         logger.info("Initialized.")
 
     def set_sampling_rate(self, input_sample_rate: int, output_sample_rate: int):
+        resample_device = torch.device('cpu') if self.device_manager.device.type == 'mps' else self.device_manager.device
         if self.input_sample_rate != input_sample_rate:
             self.input_sample_rate = input_sample_rate
             self.resampler_in = tat.Resample(
                 orig_freq=self.input_sample_rate,
                 new_freq=HUBERT_SAMPLE_RATE,
                 dtype=torch.float32
-            ).to(self.device_manager.device)
+            ).to(resample_device)
         if self.output_sample_rate != output_sample_rate:
             self.output_sample_rate = output_sample_rate
             self.resampler_out = tat.Resample(
                 orig_freq=self.slotInfo.samplingRate,
                 new_freq=self.output_sample_rate,
                 dtype=torch.float32
-            ).to(self.device_manager.device)
+            ).to(resample_device)
 
     def change_pitch_extractor(self):
         pitchExtractor = PitchExtractorManager.getPitchExtractor(
@@ -181,18 +186,23 @@ class RVCr2(VoiceChangerModel):
             raise PipelineNotInitializedException()
 
         # Input audio is always float32
-        audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
-        if self.is_half:
-            audio_in_t = audio_in_t.half()
-
-        convert_feature_size_16k = audio_in_t.shape[0] // WINDOW_SIZE
-
+        resample_device = torch.device('cpu') if self.device_manager.device.type == 'mps' else self.device_manager.device
         resampler_temp = tat.Resample(
             orig_freq=sample_rate,
             new_freq=HUBERT_SAMPLE_RATE,
-            dtype=self.dtype
-        ).to(self.device_manager.device)
-        audio_in_16k = resampler_temp(audio_in_t)
+            dtype=torch.float32
+        ).to(resample_device)
+
+        if self.device_manager.device.type == 'mps':
+            audio_in_t_cpu = torch.as_tensor(audio_in, dtype=torch.float32, device='cpu')
+            audio_in_16k_cpu = resampler_temp(audio_in_t_cpu)
+            audio_in_16k = audio_in_16k_cpu.to(self.device_manager.device)
+        else:
+            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
+            audio_in_16k = resampler_temp(audio_in_t)
+
+        if self.is_half:
+            audio_in_16k = audio_in_16k.half()
 
         vol_t = torch.sqrt(
             torch.square(audio_in_16k).mean()
@@ -226,8 +236,14 @@ class RVCr2(VoiceChangerModel):
             raise PipelineNotInitializedException()
 
         # Input audio is always float32
-        audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
-        audio_in_16k = self.resampler_in(audio_in_t)
+        if self.device_manager.device.type == 'mps':
+            audio_in_t_cpu = torch.as_tensor(audio_in, dtype=torch.float32, device='cpu')
+            audio_in_16k_cpu = self.resampler_in(audio_in_t_cpu)
+            audio_in_16k = audio_in_16k_cpu.to(self.device_manager.device)
+        else:
+            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
+            audio_in_16k = self.resampler_in(audio_in_t)
+
         if self.is_half:
             audio_in_16k = audio_in_16k.half()
 
@@ -239,9 +255,8 @@ class RVCr2(VoiceChangerModel):
         vol = max(vol_t.item(), 0)
 
         if vol < self.inputSensitivity:
-            # Busy wait to keep power manager happy and clocks stable. Running pipeline on-demand seems to lag when the delay between
-            # voice changer activation is too high.
-            # https://forums.developer.nvidia.com/t/why-kernel-calculate-speed-got-slower-after-waiting-for-a-while/221059/9
+            # Busy wait to keep power manager happy and clocks stable.
+            # Running pipeline on-demand seems to lag when the delay between voice changer activation is too high.
             self.pipeline.exec(
                 self.settings.dstId,
                 self.convert_buffer,
@@ -280,7 +295,12 @@ class RVCr2(VoiceChangerModel):
         )
 
         # FIXME: Why the heck does it require another sqrt to amplify the volume?
-        audio_out: torch.Tensor = self.resampler_out(audio_model * torch.sqrt(vol_t))
+        if self.device_manager.device.type == 'mps':
+            audio_model_cpu = audio_model.cpu().float()
+            audio_out_cpu = self.resampler_out(audio_model_cpu * torch.sqrt(vol_t.cpu().float()))
+            audio_out = audio_out_cpu.to(self.device_manager.device)
+        else:
+            audio_out: torch.Tensor = self.resampler_out(audio_model * torch.sqrt(vol_t))
 
         return audio_out, vol
 

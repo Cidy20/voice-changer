@@ -143,7 +143,7 @@ def _export2onnx(input_model: str, output_model_simple: str, metadata: dict):
             input_names=input_names,
             output_names=output_names,
         )
-        onnx_model = onnxslim.simplify(onnx.load_model_from_string(io.getvalue()))
+        onnx_model = onnxslim.slim(onnx.load_model_from_string(io.getvalue()))
 
     meta = onnx_model.metadata_props.add()
     meta.key = "metadata"

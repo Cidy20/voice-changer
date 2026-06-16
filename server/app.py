@@ -4,8 +4,8 @@ from const import ROOT_PATH
 # NOTE: This is required to fix current working directory on macOS
 os.chdir(ROOT_PATH)
 if sys.platform == 'darwin':
-    # Enable fallback to CPU since some operations may be not supported by MPS.
-    os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '1'
+    # Disable fallback to CPU to ensure end-to-end GPU speedup on MPS.
+    os.environ['PYTORCH_ENABLE_MPS_FALLBACK'] = '0'
 # Reset CUDA_PATH since all libraries are already bundled.
 # Existing CUDA installations may be incompatible with PyTorch or ONNX runtime
 os.environ['CUDA_PATH'] = ''

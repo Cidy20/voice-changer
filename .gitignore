@@ -36,7 +36,7 @@ server/model_so-vits-svc-40_tsukuyomi/
 server/model_so-vits-svc-40_kikotokurage
 model_DDSP-SVC/
 server/model_sovits
-server/test
+# server/test
 
 server/memo.md
 

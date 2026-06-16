@@ -59,6 +59,25 @@ def setup_arg_parser():
     )
     return parser
 
+def set_macos_thread_qos():
+    """Request high priority performance cores (USER_INTERACTIVE QoS) for macOS."""
+    if sys.platform == 'darwin':
+        try:
+            import ctypes
+            # CDLL(None) allows calling pthread APIs from the already loaded libSystem
+            lib = ctypes.CDLL(None)
+            if hasattr(lib, 'pthread_set_qos_class_self_np'):
+                # 0x21 corresponds to QOS_CLASS_USER_INTERACTIVE (highest interactive class)
+                res = lib.pthread_set_qos_class_self_np(0x21, 0)
+                if res == 0:
+                    logger.info("Successfully set macOS thread QoS to USER_INTERACTIVE (Performance Cores)")
+                else:
+                    logger.warning(f"Failed to set macOS thread QoS: exit code {res}")
+            else:
+                logger.warning("pthread_set_qos_class_self_np not found in libSystem")
+        except Exception as e:
+            logger.warning(f"Failed to configure macOS thread QoS: {e}")
+
 async def main():
     """Main entry point for the application."""
     parser = setup_arg_parser()
@@ -67,6 +86,9 @@ async def main():
     # Setup logging
     global logger
     logger = setup_logging(args.log_level)
+    
+    # Optimize macOS thread QoS to enforce performance cores (P-cores) usage
+    set_macos_thread_qos()
     
     logger.info(f"Python: {sys.version}")
     logger.info(f"Voice changer version: {get_version()} {get_edition()}")

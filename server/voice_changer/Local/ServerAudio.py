@@ -165,6 +165,35 @@ class ServerAudio:
         serverOutputAudioDevice = self.getServerOutputAudioDevice(self.settings.serverOutputDeviceId)
         serverMonitorAudioDevice = self.getServerOutputAudioDevice(self.settings.serverMonitorDeviceId)
 
+        # Fallback to default input device if requested device is not found
+        if serverInputAudioDevice is None:
+            try:
+                default_input_idx = sd.default.device[0]
+                logger.warning(f"Requested input device {self.settings.serverInputDeviceId} not found. Falling back to default device index {default_input_idx}")
+                serverInputAudioDevice = self.getServerInputAudioDevice(default_input_idx)
+                if serverInputAudioDevice:
+                    self.settings.serverInputDeviceId = default_input_idx
+            except Exception as e:
+                logger.warning(f"Failed to resolve default input device fallback: {e}")
+
+        # Fallback to default output device if requested device is not found
+        if serverOutputAudioDevice is None:
+            try:
+                default_output_idx = sd.default.device[1]
+                logger.warning(f"Requested output device {self.settings.serverOutputDeviceId} not found. Falling back to default device index {default_output_idx}")
+                serverOutputAudioDevice = self.getServerOutputAudioDevice(default_output_idx)
+                if serverOutputAudioDevice:
+                    self.settings.serverOutputDeviceId = default_output_idx
+            except Exception as e:
+                logger.warning(f"Failed to resolve default output device fallback: {e}")
+
+        # Safety check to prevent AttributeError: 'NoneType' object has no attribute 'maxInputChannels'
+        if serverInputAudioDevice is None or serverOutputAudioDevice is None:
+            err_msg = "No valid input or output audio device could be initialized. Please check your audio hardware."
+            logger.error(err_msg)
+            self.callbacks.emit_to(0, self.performance, ('ERR_GENERIC_SERVER_AUDIO_ERROR', err_msg))
+            return
+
         # Generate ExtraSetting
         wasapiExclusiveMode = bool(self.settings.exclusiveMode)
 
@@ -244,7 +273,9 @@ class ServerAudio:
                 return
 
         # FIXME: In UI, block size is calculated based on 48kHz so we convert from 48kHz to input device sample rate.
-        block_frame = int((self.settings.serverReadChunkSize * 128 / 48000) * self.settings.serverInputAudioSampleRate)
+        # Align block_frame to a multiple of 128 to prevent driver jitter on non-aligned chunks.
+        raw_frames = int((self.settings.serverReadChunkSize * 128 / 48000) * self.settings.serverInputAudioSampleRate)
+        block_frame = ((raw_frames + 127) // 128) * 128
 
         try:
             if serverMonitorAudioDevice is None:

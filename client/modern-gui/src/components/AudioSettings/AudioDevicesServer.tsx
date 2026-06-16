@@ -55,11 +55,13 @@ function AudioDevicesServer() {
 
   // Handle Sample Rate Change
   const handleSampleRateChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const rate = parseInt(event.target.value);
     appState.serverSetting.updateServerSettings({
       ...appState.serverSetting.serverSetting,
-      serverInputAudioSampleRate: parseInt(event.target.value),
-      serverOutputAudioSampleRate: parseInt(event.target.value),
-      serverMonitorAudioSampleRate: parseInt(event.target.value)
+      serverAudioSampleRate: rate,
+      serverInputAudioSampleRate: rate,
+      serverOutputAudioSampleRate: rate,
+      serverMonitorAudioSampleRate: rate
     });
   };
 

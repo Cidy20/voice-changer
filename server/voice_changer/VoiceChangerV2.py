@@ -128,7 +128,15 @@ class VoiceChangerV2:
         return self.vcmodel.get_processing_sampling_rate()
 
     def process_audio(self, audio_in: AudioInOutFloat) -> tuple[AudioInOutFloat, float]:
-        block_size = audio_in.shape[0]
+        # 强行对齐输入尺寸到标准块尺寸，防止由于网络包长抖动打乱 SOLA 拼接引起吞字和卡顿
+        target_size = self.settings.serverReadChunkSize * 128
+        if audio_in.shape[0] != target_size:
+            if audio_in.shape[0] < target_size:
+                audio_in = np.pad(audio_in, (0, target_size - audio_in.shape[0]), mode='constant')
+            else:
+                audio_in = audio_in[:target_size]
+        
+        block_size = target_size
 
         audio, vol = self.vcmodel.inference(audio_in)
 
