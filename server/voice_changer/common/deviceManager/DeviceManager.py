@@ -13,6 +13,8 @@ except ImportError:
 import logging
 logger = logging.getLogger(__name__)
 
+
+
 class CoreMLFlag(IntFlag):
     USE_CPU_ONLY = 0x001
     ENABLE_ON_SUBGRAPH = 0x002
@@ -135,7 +137,7 @@ class DeviceManager(object):
             devices.append(device)
         return devices
 
-    def get_onnx_execution_provider(self):
+    def get_onnx_execution_provider(self, require_static: bool = False):
         cpu_settings = {
             "intra_op_num_threads": 8,
             "execution_mode": onnxruntime.ExecutionMode.ORT_PARALLEL,
@@ -149,8 +151,30 @@ class DeviceManager(object):
         elif self.device.type == 'privateuseone' and "DmlExecutionProvider" in availableProviders:
             return ["DmlExecutionProvider", "CPUExecutionProvider"], [{"device_id": self.device.index}, cpu_settings]
         elif 'CoreMLExecutionProvider' in availableProviders:
-            coreml_flags = CoreMLFlag.ONLY_ENABLE_DEVICE_WITH_ANE
-            return ["CoreMLExecutionProvider", "CPUExecutionProvider"], [{'coreml_flags': coreml_flags}, cpu_settings]
+            is_new_ort = False
+            try:
+                from packaging.version import Version
+                is_new_ort = Version(onnxruntime.__version__) >= Version("1.21.0")
+            except Exception:
+                try:
+                    parts = [int(p) for p in onnxruntime.__version__.split('.')[:2]]
+                    if parts[0] > 1 or (parts[0] == 1 and parts[1] >= 21):
+                        is_new_ort = True
+                except Exception:
+                    pass
+            
+            if is_new_ort:
+                coreml_options = {
+                    "MLComputeUnits": "ALL",
+                    "ModelFormat": "MLProgram",
+                    "RequireStaticInputShapes": "1" if require_static else "0"
+                }
+                return ["CoreMLExecutionProvider", "CPUExecutionProvider"], [coreml_options, cpu_settings]
+            else:
+                coreml_flags = CoreMLFlag.ONLY_ENABLE_DEVICE_WITH_ANE
+                if require_static:
+                    coreml_flags |= CoreMLFlag.ONLY_ALLOW_STATIC_INPUT_SHAPES
+                return ["CoreMLExecutionProvider", "CPUExecutionProvider"], [{'coreml_flags': coreml_flags}, cpu_settings]
         else:
             return ["CPUExecutionProvider"], [cpu_settings]
 

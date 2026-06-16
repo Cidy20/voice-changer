@@ -11,7 +11,7 @@ faiss-cpu==1.11.0
 onnx==1.16.0
 onnxscript==0.2.6
 onnxslim==0.1.72
-onnxruntime==1.20.0
+onnxruntime==1.26.0
 torchcrepe==0.0.24
 torchfcpe==0.0.4
 safetensors==0.5.3

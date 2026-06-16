@@ -9,11 +9,12 @@ class OnnxEmbedder(Embedder):
 
     def load_model(self, file: str) -> Embedder:
         device_manager = DeviceManager.get_instance()
-        self.is_half = device_manager.use_fp16()
+        # Force FP32 for the ONNX Embedder to bypass new ORT optimization bugs in FP16 ONNX graphs
+        self.is_half = False
         (
             onnxProviders,
             onnxProviderOptions,
-        ) = device_manager.get_onnx_execution_provider()
+        ) = device_manager.get_onnx_execution_provider(require_static=True)
 
         model = load_onnx_model(file, self.is_half, device_manager.is_int8_avalable())
 
@@ -30,12 +31,15 @@ class OnnxEmbedder(Embedder):
     def extract_features(
         self, feats: torch.Tensor, embOutputLayer=9, useFinalProj=True
     ) -> torch.Tensor:
-        if feats.device.type == 'cuda':
+        # Keep input tensor type match with model type (which is FP32)
+        input_feats = feats.float()
+
+        if input_feats.device.type == 'cuda':
             binding = self.onnx_session.io_binding()
 
-            binding.bind_input('audio', device_type='cuda', device_id=feats.device.index, element_type=self.fp_dtype_np, shape=tuple(feats.shape), buffer_ptr=feats.data_ptr())
+            binding.bind_input('audio', device_type='cuda', device_id=input_feats.device.index, element_type=self.fp_dtype_np, shape=tuple(input_feats.shape), buffer_ptr=input_feats.data_ptr())
             for output in self.onnx_session.get_outputs():
-                binding.bind_output(output.name, device_type='cuda', device_id=feats.device.index)
+                binding.bind_output(output.name, device_type='cuda', device_id=input_feats.device.index)
 
             self.onnx_session.run_with_iobinding(binding)
 
@@ -43,12 +47,13 @@ class OnnxEmbedder(Embedder):
         else:
             units = self.onnx_session.run(
                 ['units9', 'unit12', 'unit12s'],
-                { 'audio': feats.detach().cpu().numpy() }
+                { 'audio': input_feats.detach().cpu().numpy() }
             )
         # self.onnx_session.end_profiling()
 
+        # Cast outputs back to the RVC pipeline's precision (which might be FP16)
         return torch.as_tensor(
             units[0] if embOutputLayer == 9 else units[1],
-            dtype=self.fp_dtype_t,
+            dtype=feats.dtype,
             device=feats.device
         )
