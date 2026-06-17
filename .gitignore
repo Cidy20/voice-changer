@@ -87,4 +87,4 @@ start_trainer.sh
 
 # venv
 venv/
-
+.conda/

@@ -1,0 +1,17 @@
+# # apt-get update
+# # apt-get install -y emacs mlocate wget git curl gcc g++ make unzip
+# # wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
+# # bash Anaconda3-2022.10-Linux-x86_64.sh
+
+torch==2.4.1
+torchaudio==2.4.1
+torch-directml
+faiss-cpu==1.14.3
+
+onnx==1.22.0
+onnxscript==0.2.6
+onnxruntime-directml==1.24.4
+onnxslim==0.1.93
+torchcrepe==0.0.24
+torchfcpe==0.0.4
+safetensors==0.8.0
