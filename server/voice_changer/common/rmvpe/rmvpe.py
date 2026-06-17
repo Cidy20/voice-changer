@@ -304,16 +304,18 @@ class MelSpectrogram(torch.nn.Module):
             self.hann_window[keyshift_key] = torch.hann_window(win_length_new).to(
                 audio.device
             )
+        audio_cpu = audio.detach().cpu()
         fft = torch.stft(
-            audio,
+            audio_cpu,
             n_fft=n_fft_new,
             hop_length=hop_length_new,
             win_length=win_length_new,
-            window=self.hann_window[keyshift_key],
+            window=self.hann_window[keyshift_key].detach().cpu(),
             center=center,
-            return_complex=True,
+            return_complex=False,
         )
-        magnitude = torch.sqrt(fft.real.pow(2) + fft.imag.pow(2))
+        magnitude = torch.sqrt(fft[:, :, :, 0].pow(2) + fft[:, :, :, 1].pow(2))
+        magnitude = magnitude.to(audio.device)
         if keyshift != 0:
             size = self.n_fft // 2 + 1
             resize = magnitude.size(1)
@@ -329,29 +331,33 @@ class MelSpectrogram(torch.nn.Module):
 
 class RMVPE:
     def __init__(self, model_path: str, is_half: bool, use_jit_compile: bool, device: torch.device):
+        self.device = device
+        run_on_cpu = device.type == 'privateuseone'
+        model_device = torch.device('cpu') if run_on_cpu else device
+
         model = E2E(4, 1, (2, 2))
         if model_path.endswith('.safetensors'):
-            with safe_open(model_path, 'pt', device=str(device) if device.type == 'cuda' else 'cpu') as cpt:
+            with safe_open(model_path, 'pt', device=str(model_device)) as cpt:
                 load_model(model, cpt, strict=False)
         else:
-            cpt = torch.load(model_path, map_location=device if device.type == 'cuda' else 'cpu')
+            cpt = torch.load(model_path, map_location=model_device)
             model.load_state_dict(cpt, strict=False)
-        model = model.eval().to(device)
+        model = model.eval().to(model_device)
 
-        if is_half:
+        if is_half and not run_on_cpu:
             model = model.half()
 
         self.use_jit_eager = not use_jit_compile
-        if use_jit_compile:
+        if use_jit_compile and not run_on_cpu:
             logger.info('Compiling JIT model...')
             model = torch.jit.optimize_for_inference(torch.jit.script(model))
 
         self.model = model
 
         self.mel_extractor = MelSpectrogram(
-            is_half, 128, 16000, 1024, 160, None, 30, 8000
-        ).to(device)
-        self.idx = torch.arange(360, device=device)[None, None, :]
+            is_half and not run_on_cpu, 128, 16000, 1024, 160, None, 30, 8000
+        ).to(model_device)
+        self.idx = torch.arange(360, device=model_device)[None, None, :]
         self.idx_cents = self.idx * 20 + 1997.3794084376191
 
     def mel2hidden(self, mel: torch.Tensor) -> torch.Tensor:
@@ -375,6 +381,8 @@ class RMVPE:
 
     @torch.no_grad()
     def infer_from_audio_t(self, audio: torch.Tensor, threshold: float = 0.05) -> torch.Tensor:
-        mel: torch.Tensor = self.mel_extractor(audio.unsqueeze(0), center=True)
+        audio_cpu = audio.detach().cpu().float()
+        mel: torch.Tensor = self.mel_extractor(audio_cpu.unsqueeze(0), center=True)
         hidden = self.mel2hidden(mel)
-        return self.decode(hidden, threshold)
+        result = self.decode(hidden, threshold)
+        return result.to(self.device)

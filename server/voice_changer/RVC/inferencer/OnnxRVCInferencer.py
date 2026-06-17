@@ -79,7 +79,7 @@ class OnnxRVCInferencer(Inferencer):
             )
         # self.model.end_profiling()
 
-        res = torch.as_tensor(output[0], dtype=self.fp_dtype_t, device=feats.device)
+        res = torch.as_tensor(output[0], dtype=self.fp_dtype_t).to(feats.device)
 
         if self.inferencerTypeVersion == "2.1" or self.inferencerTypeVersion == "2.2" or self.inferencerTypeVersion == "1.1":
             return res

@@ -15,6 +15,7 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
         self.type: PitchExtractorType = "rmvpe_onnx"
 
         device_manager = DeviceManager.get_instance()
+        self.device = device_manager.device
         self.is_half = device_manager.use_fp16()
         (
             onnxProviders,
@@ -33,7 +34,7 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
         # so.enable_profiling = True
         self.mel_extractor = MelSpectrogram(
             self.is_half, 128, 16000, 1024, 160, mel_fmin=30, mel_fmax=8000
-        ).to(device_manager.device)
+        ).to(self.device)
         self.onnx_session = safe_creation(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
 
     def extract(
@@ -44,13 +45,13 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
     ) -> torch.Tensor:
         mel = self.mel_extractor(audio.unsqueeze(0).float())
 
-        if audio.device.type == 'cuda':
+        if self.device.type == 'cuda':
             binding = self.onnx_session.io_binding()
 
-            binding.bind_input('mel', device_type='cuda', device_id=audio.device.index, element_type=self.fp_dtype_np, shape=tuple(mel.shape), buffer_ptr=mel.data_ptr())
+            binding.bind_input('mel', device_type='cuda', device_id=self.device.index, element_type=self.fp_dtype_np, shape=tuple(mel.shape), buffer_ptr=mel.data_ptr())
             binding.bind_cpu_input('threshold', self.threshold)
 
-            binding.bind_output('pitchf', device_type='cuda', device_id=audio.device.index)
+            binding.bind_output('pitchf', device_type='cuda', device_id=self.device.index)
 
             self.onnx_session.run_with_iobinding(binding)
 
@@ -65,4 +66,4 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
             )
         # self.onnx_session.end_profiling()
 
-        return torch.as_tensor(output[0], dtype=self.fp_dtype_t, device=audio.device).squeeze()
+        return torch.as_tensor(output[0], dtype=self.fp_dtype_t).to(audio.device).squeeze()

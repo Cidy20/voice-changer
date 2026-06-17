@@ -1,9 +1,7 @@
 import torch
-from .STFT import STFT
 from librosa.filters import mel
 from typing import Optional
 
-# This module is used by RMVPE
 class MelSpectrogram(torch.nn.Module):
     def __init__(
             self,
@@ -34,18 +32,40 @@ class MelSpectrogram(torch.nn.Module):
         self.sampling_rate = sampling_rate
         self.n_mel_channels = n_mel_channels
         self.clamp = clamp
-        self.stft = STFT(
-            filter_length=self.n_fft,
-            hop_length=self.hop_length,
-            win_length=self.win_length,
-            window="hann",
-        )
         self.is_half = is_half
+        self.hann_window = torch.hann_window(win_length)
 
     def forward(self, audio: torch.Tensor) -> torch.Tensor:
-        magnitude = self.stft.transform(audio)
-        mel_output = torch.matmul(self.mel_basis, magnitude)
+        device = audio.device
+        use_cpu_stft = device.type == 'privateuseone'
+        
+        if use_cpu_stft:
+            audio_cpu = audio.detach().cpu()
+            fft = torch.stft(
+                audio_cpu,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                win_length=self.win_length,
+                window=self.hann_window.cpu(),
+                center=True,
+                return_complex=False,
+            )
+            magnitude = torch.sqrt(fft[:, :, :, 0].pow(2) + fft[:, :, :, 1].pow(2))
+            magnitude = magnitude.to(device)
+        else:
+            fft = torch.stft(
+                audio,
+                n_fft=self.n_fft,
+                hop_length=self.hop_length,
+                win_length=self.win_length,
+                window=self.hann_window.to(device),
+                center=True,
+                return_complex=False,
+            )
+            magnitude = torch.sqrt(fft[:, :, :, 0].pow(2) + fft[:, :, :, 1].pow(2))
+        
+        mel_output = torch.matmul(self.mel_basis.to(device), magnitude)
         if self.is_half:
             mel_output = mel_output.half()
-        log_mel_spec = torch.log(torch.clamp(mel_output, min=self.clamp))
+        log_mel_spec = torch.log(torch.clamp(mel_output, min=self.clamp))       
         return log_mel_spec

@@ -198,7 +198,7 @@ class RVCr2(VoiceChangerModel):
             audio_in_16k_cpu = resampler_temp(audio_in_t_cpu)
             audio_in_16k = audio_in_16k_cpu.to(self.device_manager.device)
         else:
-            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
+            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32).to(self.device_manager.device)
             audio_in_16k = resampler_temp(audio_in_t)
 
         if self.is_half:
@@ -241,7 +241,7 @@ class RVCr2(VoiceChangerModel):
             audio_in_16k_cpu = self.resampler_in(audio_in_t_cpu)
             audio_in_16k = audio_in_16k_cpu.to(self.device_manager.device)
         else:
-            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32, device=self.device_manager.device)
+            audio_in_t = torch.as_tensor(audio_in, dtype=torch.float32).to(self.device_manager.device)
             audio_in_16k = self.resampler_in(audio_in_t)
 
         if self.is_half:

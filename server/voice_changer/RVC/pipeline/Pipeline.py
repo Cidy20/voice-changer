@@ -183,7 +183,7 @@ class Pipeline:
     def _upscale(self, feats: torch.Tensor) -> torch.Tensor:
         if self.onnx_upscaler is not None:
             feats = self.onnx_upscaler.run(['out'], { 'in': feats.permute(0, 2, 1).detach().cpu().numpy(), 'scales': np.array([2], dtype=np.float32) })
-            return torch.as_tensor(feats[0], dtype=self.dtype, device=self.device).permute(0, 2, 1).contiguous()
+            return torch.as_tensor(feats[0], dtype=self.dtype).to(self.device).permute(0, 2, 1).contiguous()
         return F.interpolate(feats.permute(0, 2, 1), scale_factor=2, mode='nearest').permute(0, 2, 1).contiguous()
 
     def exec(

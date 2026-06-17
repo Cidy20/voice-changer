@@ -45,4 +45,4 @@ class CrepeOnnxPitchExtractor(PitchExtractor):
         pd: np.ndarray = onnxcrepe.filter.median(onnx_pd, 3)
 
         f0[pd < 0.1] = 0
-        return torch.as_tensor(f0, dtype=torch.float32, device=audio.device).squeeze()
+        return torch.as_tensor(f0, dtype=torch.float32).to(audio.device).squeeze()

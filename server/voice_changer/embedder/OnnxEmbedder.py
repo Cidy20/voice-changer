@@ -55,5 +55,4 @@ class OnnxEmbedder(Embedder):
         return torch.as_tensor(
             units[0] if embOutputLayer == 9 else units[1],
             dtype=feats.dtype,
-            device=feats.device
-        )
+        ).to(feats.device)

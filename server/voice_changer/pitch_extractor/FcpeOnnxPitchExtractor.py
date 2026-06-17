@@ -75,4 +75,4 @@ class FcpeOnnxPitchExtractor(PitchExtractor):
             )
         # self.onnx_session.end_profiling()
 
-        return torch.as_tensor(output[0], dtype=self.fp_dtype_t, device=audio.device).squeeze()
+        return torch.as_tensor(output[0], dtype=self.fp_dtype_t).to(audio.device).squeeze()

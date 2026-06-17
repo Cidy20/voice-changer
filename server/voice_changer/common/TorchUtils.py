@@ -2,7 +2,7 @@ import torch
 
 def circular_write(new_data: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
     # Ensure 1-D contiguous tensors and matching device/dtype
-    new_data = torch.as_tensor(new_data, device=target.device, dtype=target.dtype).reshape(-1).contiguous()
+    new_data = torch.as_tensor(new_data, dtype=target.dtype).to(target.device).reshape(-1).contiguous()
     target = target.reshape(-1).contiguous()
 
     # Determine the amount we can actually write
