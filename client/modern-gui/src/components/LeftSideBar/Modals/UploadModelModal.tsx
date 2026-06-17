@@ -1,8 +1,22 @@
 import { useState, ChangeEvent, useEffect } from 'react';
-import { ClientState, ModelFileKind, ModelUploadSetting, RVCModelSlot, ModelInfo } from '@dannadori/voice-changer-client-js';
+import { ClientState, ModelFileKind, ModelUploadSetting, RVCModelSlot } from '@dannadori/voice-changer-client-js';
 import { CSS_CLASSES } from '../../../styles/constants';
 import GenericModal from '../../Modals/GenericModal';
 import { UIContextType } from '../../../context/UIContext';
+import { useTranslation } from 'react-i18next';
+
+interface ExtendedServerSetting {
+  embedders?: any;
+  modelSlots?: any[];
+  modelSlotIndex?: number;
+  [key: string]: any;
+}
+
+interface ExtendedModelUploadSetting extends Omit<ModelUploadSetting, 'embedder' | 'isSampleMode' | 'sampleId'> {
+  embedder?: string;
+  isSampleMode?: boolean;
+  sampleId?: number | null;
+}
 
 export interface UploadFinalForm {
   modelName: string
@@ -22,15 +36,18 @@ interface UploadModelModalProps {
 }
 
 function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: UploadModelModalProps) {
+  const { t } = useTranslation();
+  const serverSetting = appState.serverSetting?.serverSetting as ExtendedServerSetting | undefined;
+
   // ---------------- Component State ----------------
-  const [uploadSettings, setUploadSettings] = useState<UploadFinalForm>({ 
-    modelName: '', 
-    thumbnailFile: null, 
-    voiceChangerType: 'RVC', 
-    slot: 0, 
-    files: [], 
-    params: {}, 
-    embedder: appState.serverSetting.serverSetting.embedders[0]?.name || '' 
+  const [uploadSettings, setUploadSettings] = useState<UploadFinalForm>({
+    modelName: '',
+    thumbnailFile: null,
+    voiceChangerType: 'RVC',
+    slot: 0,
+    files: [],
+    params: {},
+    embedder: serverSetting?.embedders?.[0]?.name || ''
   });
   const [autoSelectModel, setAutoSelectModel] = useState<boolean>(false);
 
@@ -62,11 +79,11 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       const isZip = file.name.toLowerCase().endsWith('.zip');
-      
+
       const newFile = { kind: "rvcModel" as ModelFileKind, file: file, dir: "" };
 
       // If it's a zip file, remove any existing index file
-      const updatedFiles = uploadSettings.files.filter(f => 
+      const updatedFiles = uploadSettings.files.filter(f =>
         f.kind !== "rvcModel" && (!isZip || f.kind !== "rvcIndex")
       );
       updatedFiles.push(newFile);
@@ -131,14 +148,14 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
   const handleUploadCloseModal = () => {
     if (!appState.serverSetting.isUploading) {
       setShowUpload(false);
-      setUploadSettings({ 
-        modelName: '', 
-        thumbnailFile: null, 
-        voiceChangerType: 'RVC', 
-        slot: 0, 
-        files: [], 
-        params: {}, 
-        embedder: appState.serverSetting.serverSetting.embedders[0]?.name || '' 
+      setUploadSettings({
+        modelName: '',
+        thumbnailFile: null,
+        voiceChangerType: 'RVC',
+        slot: 0,
+        files: [],
+        params: {},
+        embedder: serverSetting?.embedders?.[0]?.name || ''
       });
       setAutoSelectModel(false);
       setThumbnailPreview(null);  // Reset thumbnail preview
@@ -149,12 +166,12 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
   // Execute the complete model upload workflow
   const handleUploadModal = async () => {
     if (!uploadSettings.files) {
-      guiState.showError('Please select a model file.', "Error");
+      guiState.showError(t('uploadModel.errorSelectModel'), 'Error');
       return;
     }
     const trimmedModelName = uploadSettings.modelName.trim();
     if (!trimmedModelName) {
-      guiState.showError('Please enter a model name.', "Error");
+      guiState.showError(t('uploadModel.errorEnterName'), 'Error');
       return;
     }
 
@@ -164,11 +181,11 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
 
       // Find first available empty slot for the new model
       if (currentModelSlots && currentModelSlots.length > 0) {
-        emptySlotIndex = currentModelSlots.findIndex((slot: RVCModelSlot) => !slot.name || slot.name.length === 0);
+        emptySlotIndex = currentModelSlots.findIndex((slot: any) => !slot.name || slot.name.length === 0);
       }
 
       if (emptySlotIndex === -1) {
-        guiState.showError('No empty model slot available. Please clear a slot or manage existing ones.', "Error");
+        guiState.showError(t('uploadModel.errorNoSlot'), 'Error');
         return;
       }
 
@@ -193,7 +210,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
         filesForUpload.push({ kind: "rvcIndex" as ModelFileKind, file: renameWithExt(indexEntry.file, "added_" + baseName), dir: "" });
       }
 
-      const uploadSettingsData: ModelUploadSetting = {
+      const uploadSettingsData: ExtendedModelUploadSetting = {
         voiceChangerType: "RVC",
         slot: emptySlotIndex,
         files: filesForUpload,
@@ -203,12 +220,12 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
 
       // Upload main model files (model + optional index file)
       console.log('Uploading model with settings:', uploadSettingsData);
-      const serverInfo = await appState.serverSetting.uploadModel(uploadSettingsData);
-      
+      const serverInfo = (await appState.serverSetting.uploadModel(uploadSettingsData as any)) as any;
+
       // Verify that the model was actually uploaded by checking if the slot has a model file
       const uploadedModel = serverInfo.modelSlots[emptySlotIndex];
       const hasModelFile = uploadedModel && 'modelFile' in uploadedModel && uploadedModel.modelFile;
-      
+
       if (hasModelFile) {
         console.log('Model uploaded successfully.');
 
@@ -225,11 +242,11 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
         }
 
         // Notify user of successful upload
-        guiState.showError("Model uploaded successfully!", "Confirm");
+        guiState.showError(t('uploadModel.successMessage'), 'Confirm');
 
         // Automatically switch to the newly uploaded model if requested
         if (autoSelectModel) {
-          guiState.startLoading("Swapping to model: " + uploadSettings.modelName);
+          guiState.startLoading(t('uploadModel.swappingToModel') + uploadSettings.modelName);
           await appState.serverSetting.updateServerSettings({
             ...appState.serverSetting.serverSetting,
             modelSlotIndex: emptySlotIndex
@@ -238,14 +255,14 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
         }
       } else {
         console.error('Model upload failed - no model file found in slot after upload');
-        guiState.showError("Failed to upload model. The model file was not properly saved.", "Error");
+        guiState.showError(t('uploadModel.errorSaveFailed'), 'Error');
         return; // Exit early if model upload failed
       }
 
       handleUploadCloseModal();
     } catch (error) {
       console.error('Error uploading model:', error);
-      guiState.showError(`Error uploading model: ${error instanceof Error ? error.message : String(error)}`, "Error");
+      guiState.showError(`${t('uploadModel.errorUploading')}${error instanceof Error ? error.message : String(error)}`, 'Error');
     }
   };
 
@@ -255,17 +272,17 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
     <GenericModal
       isOpen={showUpload}
       onClose={handleUploadCloseModal}
-      title="Upload Model"
+      title={t('uploadModel.title')}
       closeOnOutsideClick={false}
       primaryButton={{
-        text: `${appState.serverSetting.isUploading ? `Uploading... (${appState.serverSetting.uploadProgress.toFixed(1)}%)` : 'Upload'}`,
+        text: `${appState.serverSetting.isUploading ? `${t('uploadModel.uploading')} (${appState.serverSetting.uploadProgress.toFixed(1)}%)` : t('uploadModel.upload')}`,
         onClick: handleUploadModal,
         className: CSS_CLASSES.modalPrimaryButton,
         disabled: appState.serverSetting.isUploading
       }}
       secondaryButton={
         {
-          text: "Cancel",
+          text: t('uploadModel.cancel'),
           onClick: handleUploadCloseModal,
           className: CSS_CLASSES.modalSecondaryButton,
           disabled: appState.serverSetting.isUploading
@@ -275,7 +292,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
       <div className="space-y-4 py-2 max-h-[70vh] overflow-y-auto pr-2">
         {/* Main model file input - Required for upload */}
         <div>
-          <label htmlFor="modelFile" className={CSS_CLASSES.label}>Model File (.pth, .safetensors, .onnx, .zip):</label>
+          <label htmlFor="modelFile" className={CSS_CLASSES.label}>{t('uploadModel.modelFileLabel')}</label>
           <input
             type="file"
             id="modelFile"
@@ -291,7 +308,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
           <div className="space-y-4 ml-2 pl-3 border-l-2 border-slate-200 dark:border-gray-700">
             {/* Model name input with auto-population from filename */}
             <div className="space-y-2">
-              <label htmlFor="modelName" className={CSS_CLASSES.label}>Model Name:</label>
+              <label htmlFor="modelName" className={CSS_CLASSES.label}>{t('uploadModel.modelNameLabel')}</label>
               <div className="relative">
                 <input
                   type="text"
@@ -299,7 +316,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
                   value={uploadSettings.modelName}
                   onChange={(e) => setUploadSettings({ ...uploadSettings, modelName: e.target.value })}
                   className={`${CSS_CLASSES.input} pl-3 pr-10 py-2 bg-white/50 dark:bg-gray-700/50 border-slate-300/70 dark:border-gray-600/70 focus:ring-2 focus:ring-blue-500/50 focus:border-transparent text-sm`}
-                  placeholder="Enter a descriptive name for your model"
+                  placeholder={t('uploadModel.modelNamePlaceholder')}
                   disabled={appState.serverSetting.isUploading}
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -312,7 +329,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
 
             {/* Embedder selection */}
             <div className="space-y-2">
-              <label htmlFor="embedderType" className={CSS_CLASSES.label}>Embedder Type:</label>
+              <label htmlFor="embedderType" className={CSS_CLASSES.label}>{t('uploadModel.embedderTypeLabel')}</label>
               <select
                 id="embedderType"
                 value={uploadSettings.embedder}
@@ -320,18 +337,18 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
                 className={CSS_CLASSES.select}
                 disabled={appState.serverSetting.isUploading}
               >
-                {Object.entries(appState.serverSetting.serverSetting.embedders || {})
-                  .filter(([_, embedder]) => embedder.downloaded === true)
+                {Object.entries(serverSetting?.embedders || {})
+                  .filter(([_, embedder]) => (embedder as any).downloaded === true)
                   .length === 0 ? (
-                  <option value="">No downloaded embedders available</option>
+                  <option value="">{t('uploadModel.noEmbedders')}</option>
                 ) : (
-                  Object.entries(appState.serverSetting.serverSetting.embedders || {})
-                    .filter(([_, embedder]) => embedder.downloaded === true)
+                  Object.entries(serverSetting?.embedders || {})
+                    .filter(([_, embedder]) => (embedder as any).downloaded === true)
                     .map(([key, embedder]) => (
-                    <option key={key} value={key}>
-                      {embedder.name}
-                    </option>
-                  ))
+                      <option key={key} value={key}>
+                        {(embedder as any).name}
+                      </option>
+                    ))
                 )}
               </select>
             </div>
@@ -340,20 +357,20 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
 
         {/* Optional index file for improved conversion quality */}
         <div>
-          <label htmlFor="indexFile" className={CSS_CLASSES.label}>Index File (.index) (Optional):</label>
+          <label htmlFor="indexFile" className={CSS_CLASSES.label}>{t('uploadModel.indexFileLabel')}</label>
           <input
-              type="file"
-              id="indexFile"
-              accept=".index"
-              onChange={handleIndexFileChange}
-              className={CSS_CLASSES.fileInput}
-              disabled={appState.serverSetting.isUploading}
-            />
+            type="file"
+            id="indexFile"
+            accept=".index"
+            onChange={handleIndexFileChange}
+            className={CSS_CLASSES.fileInput}
+            disabled={appState.serverSetting.isUploading}
+          />
         </div>
 
         {/* Optional thumbnail image with live preview */}
         <div>
-          <label htmlFor="thumbnailFile" className={CSS_CLASSES.label}>Thumbnail Image (Optional):</label>
+          <label htmlFor="thumbnailFile" className={CSS_CLASSES.label}>{t('uploadModel.thumbnailFileLabel')}</label>
           <input
             type="file"
             id="thumbnailFile"
@@ -373,7 +390,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
               className="flex items-center justify-between w-full text-sm font-medium text-slate-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors disabled:opacity-50"
               disabled={appState.serverSetting.isUploading}
             >
-              <span>Preview Thumbnail</span>
+              <span>{t('uploadModel.previewThumbnail')}</span>
               <svg
                 className={`ml-2 h-4 w-4 transition-transform duration-200 ${isThumbnailExpanded ? 'rotate-180' : ''}`}
                 fill="none"
@@ -388,7 +405,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
               <div className="space-y-4 p-3 bg-slate-50 dark:bg-gray-800/30 rounded-lg border border-slate-200 dark:border-gray-700">
                 {/* Preview mode toggle - Shows how thumbnail appears in different UI contexts */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-600 dark:text-gray-300">Preview Mode:</span>
+                  <span className="text-sm font-medium text-slate-600 dark:text-gray-300">{t('uploadModel.previewMode')}</span>
                   <div className="flex space-x-2">
                     <button
                       type="button"
@@ -396,7 +413,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
                       className={`px-3 py-1 text-xs rounded-md transition-colors ${previewMode === 'settings' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'text-slate-500 hover:bg-slate-100 dark:text-gray-400 dark:hover:bg-gray-700'} disabled:opacity-50`}
                       disabled={appState.serverSetting.isUploading}
                     >
-                      Settings
+                      {t('uploadModel.previewSettings')}
                     </button>
                     <button
                       type="button"
@@ -404,7 +421,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
                       className={`px-3 py-1 text-xs rounded-md transition-colors ${previewMode === 'list' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' : 'text-slate-500 hover:bg-slate-100 dark:text-gray-400 dark:hover:bg-gray-700'} disabled:opacity-50`}
                       disabled={appState.serverSetting.isUploading}
                     >
-                      List
+                      {t('uploadModel.previewList')}
                     </button>
                   </div>
                 </div>
@@ -436,7 +453,7 @@ function UploadModelModal({ appState, guiState, showUpload, setShowUpload }: Upl
             onChange={(e) => setAutoSelectModel(e.target.checked)}
           />
           <label htmlFor="auto-select" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-            Select model after upload
+            {t('uploadModel.selectAfterUpload')}
           </label>
         </div>
       </div>

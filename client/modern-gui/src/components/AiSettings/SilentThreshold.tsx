@@ -3,6 +3,7 @@ import { ClientState } from "@dannadori/voice-changer-client-js";
 import { CSS_CLASSES } from "../../styles/constants";
 import { useEffect, useState } from "react";
 import { UIContextType } from "../../context/UIContext";
+import { useTranslation } from "react-i18next";
 
 interface SilenceThresholdProps {
   appState: ClientState;
@@ -10,6 +11,7 @@ interface SilenceThresholdProps {
 }
 
 function SilentThreshold({ appState, uiState }: SilenceThresholdProps) {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const [localSilentThreshold, setLocalSilentThreshold] = useState<number>(
     appState.serverSetting?.serverSetting?.silentThreshold ?? -75
@@ -38,7 +40,7 @@ function SilentThreshold({ appState, uiState }: SilenceThresholdProps) {
 
   return (
     <div>
-      <label htmlFor="inSens" className={CSS_CLASSES.label}>Input Sensitivity (In. Sens):</label>
+      <label htmlFor="inSens" className={CSS_CLASSES.label}>{t('aiSettings.silentThreshold')}:</label>
       <DebouncedSlider
         id="inSens"
         name="inSens"

@@ -1,0 +1,625 @@
+{
+  "sidebar": {
+    "modelSelector": "Model Selector",
+    "availableModels": "Available Models",
+    "uploadNewModel": "Upload New Model",
+    "filterAndSort": "Filter & Sort",
+    "searchModels": "Search Models...",
+    "sortSlot": "Slot",
+    "sortName": "Name",
+    "sortBy": "Sort by:",
+    "sortDescending": "Sort Descending",
+    "sortAscending": "Sort Ascending",
+    "filterBy": "Filter by:",
+    "filterType": "Type:",
+    "filterRate": "Rate:",
+    "filterEmbedder": "Embedder:",
+    "all": "All"
+  },
+  "bottomBar": {
+    "mergeLab": "Merge Lab",
+    "advancedSettings": "Advanced Settings",
+    "startServer": "Start Server",
+    "stopServer": "Stop Server",
+    "passthroughOn": "Passthrough ON",
+    "passthroughOff": "Passthrough OFF",
+    "serverInfo": "Server Info",
+    "clientInfo": "Client Info"
+  },
+  "modelSettings": {
+    "title": "Model Settings",
+    "slotIndex": "Model Slot Index",
+    "samplingRate": "Sampling Rate",
+    "tune": "Tune (semitones)",
+    "activeSlot": "Active Slot",
+    "modelSlot": "Model Slot",
+    "none": "None",
+    "saveSettings": "Save Settings",
+    "selectModelPrompt": "Select a model from the list \n to see its settings.",
+    "pitch": "Pitch:",
+    "formantShift": "Formant Shift:",
+    "indexRatio": "Index Ratio:",
+    "speaker": "Speaker:",
+    "noSpeakers": "No speakers",
+    "editModel": "Edit Model",
+    "embedder": "Embedder",
+    "modelType": "Model Type",
+    "sampleRate": "Sample Rate"
+  },
+  "performance": {
+    "title": "Performance Stats",
+    "latency": "Latency",
+    "cpu": "CPU",
+    "gpu": "GPU",
+    "fps": "FPS",
+    "recording": "Recording",
+    "vol": "Vol",
+    "ping": "Ping",
+    "total": "Total",
+    "perf": "Perf",
+    "stopRecording": "Stop",
+    "startRecording": "Record",
+    "stopTitle": "Stop Recording & Download CSV",
+    "startTitle": "Start Recording Performance Log",
+    "history": "History"
+  },
+  "aiSettings": {
+    "title": "Ai Settings",
+    "chunk": "Chunk Size",
+    "extra": "Extra Processing Time (Extra)",
+    "f0Detector": "Pitch Extraction Algorithm",
+    "gpuConfig": "Processing Unit (GPU)",
+    "noGpus": "No GPUs available",
+    "noPitchExtractors": "No downloaded pitch extractors available",
+    "noiseReduction": "Noise Reduction",
+    "echoCancellation": "Echo Cancellation",
+    "noiseSuppression": "Noise Suppression",
+    "noiseSuppression2": "Noise Suppression 2",
+    "serverIO": "ServerIO Analyzer",
+    "silentThreshold": "Input Sensitivity (In. Sens)",
+    "startServerIORecord": "Start Recording",
+    "stopServerIORecord": "Stop Recording",
+    "serverIORecording": "Recording...",
+    "serverIOOutputDevice": "Output Device",
+    "serverIOInputAudio": "Input Audio",
+    "serverIOOutputAudio": "Output Audio",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "outputDevice": "Output Device",
+    "downloadAudio": "Download Audio"
+  },
+  "audioSettings": {
+    "title": "Audio Settings",
+    "inputVolume": "Input Volume",
+    "outputVolume": "Output Volume",
+    "monitorVolume": "Monitor Volume",
+    "audioProcessing": "Audio Processing",
+    "client": "Client",
+    "server": "Server",
+    "reloadDeviceList": "Reload Device List",
+    "clientAudioNotAvailable": "Client audio not available",
+    "serverAudioNotAvailable": "Server audio not available",
+    "inputDeviceLabel": "Input Device",
+    "noInputDevicesFound": "No input devices found",
+    "outputDeviceLabel": "Output Device",
+    "noOutputDevicesFound": "No output devices found",
+    "monitorDeviceLabel": "Monitor Device",
+    "noDeviceSelected": "No device selected",
+    "audioDriverLabel": "Audio Driver",
+    "noDriversAvailable": "No drivers available",
+    "channelLabel": "Channel",
+    "defaultChannel": "Default",
+    "monitorDriverLabel": "Monitor Driver",
+    "noDevicesForDriver": "No devices for driver",
+    "sampleRateLabel": "Sample Rate:"
+  },
+  "audioEffects": {
+    "title": "Audio Effects",
+    "effects": "Effects",
+    "backgroundTracks": "Background Tracks",
+    "input": "Input",
+    "output": "Output",
+    "background": "Background",
+    "drag": "Drag",
+    "dragToReorder": "Drag to reorder",
+    "disable": "Disable",
+    "enable": "Enable",
+    "deleteEffect": "Delete",
+    "chain": "Chain",
+    "signalFlowDirection": "Signal flows from top to bottom",
+    "addEffect": "Add Effect",
+    "noEffectsAdded": "No {{channel}} effects added yet.",
+    "clickAddPrompt": "Click the + button to add an effect.",
+    "audioInputLabel": "Audio Input",
+    "fromProcessingLabel": "From Processing",
+    "toProcessingLabel": "To Processing",
+    "audioOutputLabel": "Audio Output",
+    "addAudioEffect": "Add Audio Effect",
+    "cancel": "Cancel",
+    "chooseEffectPrompt": "Choose an effect for the {{channel}} channel",
+    "searchEffectsPlaceholder": "Search effects...",
+    "allProviders": "All Providers ({{count}} effects)",
+    "effectsCount": "{{count}} effects",
+    "noEffectsFound": "No effects found",
+    "adjustSearchTerms": "Try adjusting your search terms",
+    "effectsShownCount": "{{shown}} of {{total}} effects shown",
+    "configuration": "Configuration",
+    "selectEffectToConfigure": "Select an effect to configure its parameters",
+    "unknownEffect": "Unknown Effect",
+    "effectDefinitionNotFound": "Effect definition not found for type: {{type}}",
+    "effectTypeSuffix": "{{type}} Effect",
+    "channelLabelSuffix": "channel",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "untitled": "Untitled",
+    "backgroundTracksHeader": "Background Tracks",
+    "backgroundTracksSub": "Tracks will be mixed with converted audio",
+    "addAudioFile": "Add audio file(s)",
+    "noBackgroundTracks": "No background tracks yet. Use the + button to add audio files.",
+    "backgroundConfig": "Background Config",
+    "selectBackgroundTrack": "Select a background track",
+    "trackNameLabel": "Name",
+    "gainLabel": "Gain",
+    "modeLabel": "Mode",
+    "loopMode": "Loop",
+    "randomMode": "Random",
+    "loopPauseLabel": "Loop Pause (s)",
+    "minPauseLabel": "Min Pause (s)",
+    "maxPauseLabel": "Max Pause (s)",
+    "previewLabel": "Preview",
+    "backgroundSoundUploadSuccess": "Background sound uploaded successfully!",
+    "pause": "Pause"
+  },
+  "uploadModel": {
+    "title": "Upload Model",
+    "upload": "Upload",
+    "uploading": "Uploading...",
+    "cancel": "Cancel",
+    "errorSelectModel": "Please select a model file.",
+    "errorTitle": "Error",
+    "errorEnterName": "Please enter a model name.",
+    "errorNoSlot": "No empty model slot available. Please clear a slot or manage existing ones.",
+    "successMessage": "Model uploaded successfully!",
+    "confirmTitle": "Confirm",
+    "errorSaveFailed": "Failed to upload model. The model file was not properly saved.",
+    "swappingToModel": "Swapping to model: ",
+    "errorUploading": "Error uploading model: ",
+    "modelFileLabel": "Model File (.pth, .safetensors, .onnx, .zip):",
+    "modelNameLabel": "Model Name:",
+    "modelNamePlaceholder": "Enter a descriptive name for your model",
+    "embedderTypeLabel": "Embedder Type:",
+    "noEmbedders": "No downloaded embedders available",
+    "indexFileLabel": "Index File (.index) (Optional):",
+    "thumbnailFileLabel": "Thumbnail Image (Optional):",
+    "previewThumbnail": "Preview Thumbnail",
+    "previewMode": "Preview Mode:",
+    "previewSettings": "Settings",
+    "previewList": "List",
+    "selectAfterUpload": "Select model after upload"
+  },
+  "mergeLab": {
+    "title": "Merge Lab",
+    "merging": "Merging...",
+    "merge": "Merge",
+    "close": "Close",
+    "mergeSuccess": "Models merged successfully!",
+    "downloadSuccess": "Models downloaded successfully!",
+    "errorNoEmptySlot": "No empty slots available for saving.",
+    "uploadSuccess": "Models uploaded successfully!",
+    "errorNoAction": "No action selected. Please select at least one action.",
+    "errorMerging": "Error merging models: ",
+    "filterSettings": "Filter Settings",
+    "searchModelsLabel": "Search Models:",
+    "searchPlaceholder": "Search by model name...",
+    "sampleRateLabel": "Sample Rate:",
+    "embedderLabel": "Embedder:",
+    "noEmbedders": "No embedders available",
+    "mergeOptions": "Merge Options",
+    "downloadMergedModel": "Download merged model",
+    "saveToMergeSlot": "Save to merge slot",
+    "saveToEmptySlot": "Save to empty slot (auto-select first available)",
+    "noEmptySlotsAvailable": "No empty slots available",
+    "noModelsMatch": "No models match the current filter criteria.",
+    "selectedModelsCount": "Selected models",
+    "totalWeight": "Total weight"
+  },
+  "advancedSettings": {
+    "title": "Advanced Settings",
+    "close": "Close",
+    "tabSettings": "Settings",
+    "tabDownloader": "Downloader",
+    "protocolLabel": "Protocol",
+    "crossfadeOverlapLabel": "Crossfade Overlap",
+    "silenceFrontLabel": "Silence Front",
+    "forceFp32Label": "Force FP32 Mode",
+    "disableJitLabel": "Disable JIT Compilation",
+    "convertToOnnxLabel": "Convert to ONNX",
+    "protectLabel": "Protect",
+    "dangerZone": "Danger Zone",
+    "skipPassThroughConfirmation": "Skip Pass through confirmation",
+    "inUse": "In Use",
+    "required": "Required",
+    "installed": "Installed",
+    "delete": "Delete",
+    "downloading": "Downloading",
+    "download": "Download",
+    "embedders": "Embedders",
+    "pitchExtractionAlgorithms": "Pitch Extraction Algorithms",
+    "noEmbeddersAvailable": "No embedders available",
+    "noPitchAlgorithmsAvailable": "No pitch extraction algorithms available",
+    "enablingSilenceFront": "Enabling Silence Front",
+    "disablingSilenceFront": "Disabling Silence Front",
+    "enablingForceFp32": "Enabling Force FP32 Mode",
+    "disablingForceFp32": "Disabling Force FP32 Mode",
+    "enablingJit": "Enabling JIT Compilation",
+    "disablingJit": "Disabling JIT Compilation",
+    "enablingOnnx": "Enabling Convert to ONNX",
+    "disablingOnnx": "Disabling Convert to ONNX",
+    "downloadSuccess": "downloaded",
+    "deleteSuccess": "deleted",
+    "embedderLabel": "Embedder",
+    "pitchExtractorLabel": "Pitch Extractor",
+    "actionSuccess": "{{type}} \"{{name}}\" {{action}} successfully!",
+    "actionFailed": "Failed to {{action}} {{type}}: {{error}}"
+  },
+  "effectsDefinition": {
+    "reverb": {
+      "name": "Reverb",
+      "description": "Adds room ambience and depth",
+      "parameters": {
+        "roomSize": {
+          "name": "Room Size",
+          "description": "Controls the size of the simulated room space"
+        },
+        "damping": {
+          "name": "Damping",
+          "description": "Amount of high-frequency absorption in the room"
+        },
+        "wetDryMix": {
+          "name": "Wet/Dry Mix",
+          "description": "Balance between original and reverb signal"
+        },
+        "preDelay": {
+          "name": "Pre-delay",
+          "description": "Delay before reverb starts, simulates room distance"
+        }
+      }
+    },
+    "echo": {
+      "name": "Echo",
+      "description": "Creates delayed repetitions",
+      "parameters": {
+        "delayTime": {
+          "name": "Delay Time",
+          "description": "Time between the original sound and the echo"
+        },
+        "feedback": {
+          "name": "Feedback",
+          "description": "How much of the echo is fed back to create repeats"
+        },
+        "wetLevel": {
+          "name": "Wet Level",
+          "description": "Volume level of the echo effect"
+        },
+        "highCut": {
+          "name": "High Cut",
+          "description": "Removes high frequencies from the echo"
+        }
+      }
+    },
+    "chorus": {
+      "name": "Chorus",
+      "description": "Adds richness and width",
+      "parameters": {
+        "rate": {
+          "name": "Rate",
+          "description": "Speed of the chorus modulation"
+        },
+        "depth": {
+          "name": "Depth",
+          "description": "Intensity of the pitch modulation"
+        },
+        "mix": {
+          "name": "Mix",
+          "description": "Balance between dry and chorus signal"
+        },
+        "voiceCount": {
+          "name": "Voice Count",
+          "description": "Number of virtual voices in the chorus"
+        }
+      }
+    },
+    "distortion": {
+      "name": "Distortion",
+      "description": "Adds harmonic saturation",
+      "parameters": {
+        "drive": {
+          "name": "Drive",
+          "description": "Amount of distortion applied to the signal"
+        },
+        "tone": {
+          "name": "Tone",
+          "description": "EQ balance from dark to bright"
+        },
+        "level": {
+          "name": "Level",
+          "description": "Output volume of the effect"
+        },
+        "type": {
+          "name": "Type",
+          "description": "Character of the distortion algorithm"
+        }
+      }
+    },
+    "compressor": {
+      "name": "Compressor",
+      "description": "Controls dynamic range",
+      "parameters": {
+        "threshold": {
+          "name": "Threshold",
+          "description": "Level above which compression starts"
+        },
+        "ratio": {
+          "name": "Ratio",
+          "description": "How much the signal is compressed"
+        },
+        "attack": {
+          "name": "Attack",
+          "description": "How quickly the compressor responds to loud signals"
+        },
+        "release": {
+          "name": "Release",
+          "description": "How quickly the compressor stops compressing"
+        }
+      }
+    },
+    "equalizer": {
+      "name": "Equalizer",
+      "description": "Adjusts frequency response",
+      "parameters": {
+        "low": {
+          "name": "Low (80Hz)",
+          "description": "Boost or cut low frequencies (bass)"
+        },
+        "lowMid": {
+          "name": "Low-Mid (320Hz)",
+          "description": "Boost or cut low-mid frequencies (warmth)"
+        },
+        "mid": {
+          "name": "Mid (1.25kHz)",
+          "description": "Boost or cut mid frequencies (presence)"
+        },
+        "highMid": {
+          "name": "High-Mid (5kHz)",
+          "description": "Boost or cut high-mid frequencies (clarity)"
+        },
+        "high": {
+          "name": "High (12.5kHz)",
+          "description": "Boost or cut high frequencies (air/brightness)"
+        }
+      }
+    },
+    "noiseGate": {
+      "name": "Noise Gate",
+      "description": "Eliminates unwanted background noise",
+      "parameters": {
+        "threshold": {
+          "name": "Threshold",
+          "description": "Level below which audio is gated (silenced)"
+        },
+        "ratio": {
+          "name": "Ratio",
+          "description": "How aggressively the gate closes"
+        },
+        "attack": {
+          "name": "Attack",
+          "description": "How quickly the gate opens"
+        },
+        "release": {
+          "name": "Release",
+          "description": "How quickly the gate closes"
+        }
+      }
+    },
+    "gain": {
+      "name": "Gain",
+      "description": "Adjusts overall volume level",
+      "parameters": {
+        "gain": {
+          "name": "Gain",
+          "description": "Amount of volume boost or cut"
+        }
+      }
+    },
+    "lowpass": {
+      "name": "Low Pass Filter",
+      "description": "Removes high frequencies above cutoff",
+      "parameters": {
+        "cutoff": {
+          "name": "Cutoff Frequency",
+          "description": "Frequency above which signals are filtered out"
+        },
+        "resonance": {
+          "name": "Resonance",
+          "description": "Emphasis at the cutoff frequency"
+        }
+      }
+    },
+    "highpass": {
+      "name": "High Pass Filter",
+      "description": "Removes low frequencies below cutoff",
+      "parameters": {
+        "cutoff": {
+          "name": "Cutoff Frequency",
+          "description": "Frequency below which signals are filtered out"
+        },
+        "resonance": {
+          "name": "Resonance",
+          "description": "Emphasis at the cutoff frequency"
+        }
+      }
+    },
+    "bitcrush": {
+      "name": "Bitcrush",
+      "description": "Adds lo-fi digital reduction",
+      "parameters": {
+        "bitDepth": {
+          "name": "Bit Depth",
+          "description": "Number of bits for quantization"
+        }
+      }
+    },
+    "clipping": {
+      "name": "Clipping",
+      "description": "Hard distortion by signal clipping",
+      "parameters": {
+        "threshold": {
+          "name": "Threshold",
+          "description": "Level at which clipping occurs"
+        }
+      }
+    },
+    "limiter": {
+      "name": "Limiter",
+      "description": "Prevents audio from exceeding threshold",
+      "parameters": {
+        "threshold": {
+          "name": "Threshold",
+          "description": "Maximum output level"
+        },
+        "release": {
+          "name": "Release",
+          "description": "Time to return to normal after limiting"
+        }
+      }
+    },
+    "invert": {
+      "name": "Invert",
+      "description": "Flips signal polarity",
+      "parameters": {}
+    },
+    "ladderFilter": {
+      "name": "Ladder Filter",
+      "description": "Moog-style multimode filter",
+      "parameters": {
+        "cutoff": {
+          "name": "Cutoff Frequency",
+          "description": "Filter cutoff frequency"
+        },
+        "resonance": {
+          "name": "Resonance",
+          "description": "Filter resonance (emphasis at cutoff)"
+        },
+        "drive": {
+          "name": "Drive",
+          "description": "Amount of filter overdrive"
+        },
+        "mode": {
+          "name": "Mode",
+          "description": "Filter mode (LPF=lowpass, HPF=highpass, BPF=bandpass)"
+        }
+      }
+    },
+    "peakFilter": {
+      "name": "Peak Filter",
+      "description": "Parametric EQ band",
+      "parameters": {
+        "cutoff": {
+          "name": "Frequency",
+          "description": "Center frequency of the peak"
+        },
+        "gain": {
+          "name": "Gain",
+          "description": "Boost or cut at the center frequency"
+        },
+        "q": {
+          "name": "Q Factor",
+          "description": "Width of the frequency band"
+        }
+      }
+    },
+    "highShelfFilter": {
+      "name": "High Shelf Filter",
+      "description": "Boosts/cuts high frequencies",
+      "parameters": {
+        "cutoff": {
+          "name": "Cutoff Frequency",
+          "description": "Frequency where shelf begins"
+        },
+        "gain": {
+          "name": "Gain",
+          "description": "Amount of boost or cut"
+        },
+        "q": {
+          "name": "Q Factor",
+          "description": "Sharpness of the transition"
+        }
+      }
+    },
+    "lowShelfFilter": {
+      "name": "Low Shelf Filter",
+      "description": "Boosts/cuts low frequencies",
+      "parameters": {
+        "cutoff": {
+          "name": "Cutoff Frequency",
+          "description": "Frequency where shelf begins"
+        },
+        "gain": {
+          "name": "Gain",
+          "description": "Amount of boost or cut"
+        },
+        "q": {
+          "name": "Q Factor",
+          "description": "Sharpness of the transition"
+        }
+      }
+    },
+    "convolution": {
+      "name": "Convolution",
+      "description": "Impulse response reverb/simulation",
+      "parameters": {
+        "impulseResponse": {
+          "name": "Impulse Response",
+          "description": "Type of acoustic space to simulate"
+        },
+        "mix": {
+          "name": "Mix",
+          "description": "Balance between dry and processed signal"
+        }
+      }
+    },
+    "mp3Compressor": {
+      "name": "MP3 Compressor",
+      "description": "Adds MP3 compression artifacts",
+      "parameters": {
+        "vbrQuality": {
+          "name": "VBR Quality",
+          "description": "MP3 VBR quality (0=highest, 9=lowest)"
+        }
+      }
+    },
+    "gsmCompressor": {
+      "name": "GSM Compressor",
+      "description": "2G cellular phone compression",
+      "parameters": {}
+    },
+    "delay": {
+      "name": "Simple Delay",
+      "description": "Basic delay effect",
+      "parameters": {
+        "delayTime": {
+          "name": "Delay Time",
+          "description": "Time delay for echoes"
+        },
+        "feedback": {
+          "name": "Feedback",
+          "description": "Amount of feedback for multiple echoes"
+        },
+        "wetLevel": {
+          "name": "Wet Level",
+          "description": "Level of delayed signal"
+        }
+      }
+    }
+  }
+}

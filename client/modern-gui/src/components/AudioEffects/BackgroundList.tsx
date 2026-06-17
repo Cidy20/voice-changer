@@ -2,7 +2,8 @@ import { JSX, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTrash, faShuffle, faRepeat } from '@fortawesome/free-solid-svg-icons';
 import { CSS_CLASSES } from '../../styles/constants';
-import { BackgroundTrack } from '@dannadori/voice-changer-client-js';
+import { BackgroundTrack } from './BackgroundConfig';
+import { useTranslation } from 'react-i18next';
 
 
 export type BackgroundListProps = {
@@ -21,6 +22,7 @@ function TrackItem({ track, isSelected, onSelect, onDelete, onToggle }: {
   onDelete: () => void;
   onToggle: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <div
       className={`p-3 rounded-md border cursor-pointer transition-all duration-150 ${
@@ -35,7 +37,7 @@ function TrackItem({ track, isSelected, onSelect, onDelete, onToggle }: {
           <button
             onClick={(e) => { e.stopPropagation(); onToggle(); }}
             className={`${CSS_CLASSES.iconButton} ${track.enabled ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300' : 'text-slate-400 dark:text-gray-500 hover:text-slate-500 dark:hover:text-gray-400'}`}
-            title={track.enabled ? 'Disable' : 'Enable'}
+            title={track.enabled ? t('audioEffects.disable') : t('audioEffects.enable')}
           >
             <FontAwesomeIcon icon={track.mode === 'loop' ? faRepeat : faShuffle} className="h-4 w-4" />
           </button>
@@ -43,17 +45,17 @@ function TrackItem({ track, isSelected, onSelect, onDelete, onToggle }: {
           <div>
           <div className="font-medium text-slate-700 dark:text-gray-200 text-sm flex items-center space-x-2">
             <span className="truncate max-w-[180px]" title={track.name || track.filename }>
-              {track.name || track.filename || 'Untitled'}
+              {track.name || track.filename || t('audioEffects.untitled')}
             </span>
           </div>
             <div className="text-xs text-slate-500 dark:text-gray-400 flex items-center space-x-2">
               <span className="capitalize">{track.mode}</span>
               <span>•</span>
               {track.mode === 'loop' ? (
-                <span>Pause {((track.loopPauseSec ?? 0)).toFixed(1)}s</span>
+                <span>{t('audioEffects.pause')} {((track.loopPauseSec ?? 0)).toFixed(1)}s</span>
               ) : (
                 <span>
-                  Pause {(track.random?.minPauseSec ?? 2).toFixed(1)}–{(track.random?.maxPauseSec ?? 5).toFixed(1)}s
+                  {t('audioEffects.pause')} {(track.random?.minPauseSec ?? 2).toFixed(1)}–{(track.random?.maxPauseSec ?? 5).toFixed(1)}s
                 </span>
               )}
               <span>•</span>
@@ -65,7 +67,7 @@ function TrackItem({ track, isSelected, onSelect, onDelete, onToggle }: {
         <button
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
           className={`${CSS_CLASSES.iconButton} text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300`}
-          title="Delete"
+          title={t('audioEffects.deleteEffect')}
         >
           <FontAwesomeIcon icon={faTrash} className="h-4 w-4" />
         </button>
@@ -75,7 +77,7 @@ function TrackItem({ track, isSelected, onSelect, onDelete, onToggle }: {
 }
 
 export default function BackgroundList({ tracks, selectedId, onSelect, onAddFiles, onDelete, onToggle }: BackgroundListProps): JSX.Element {
-
+  const { t } = useTranslation();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -83,8 +85,8 @@ export default function BackgroundList({ tracks, selectedId, onSelect, onAddFile
       {/* Header */}
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600">
         <div>
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">Background Tracks</h5>
-          <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">Tracks will be mixed with converted audio</div>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">{t('audioEffects.backgroundTracksHeader')}</h5>
+          <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">{t('audioEffects.backgroundTracksSub')}</div>
         </div>
         <div>
           <input
@@ -101,7 +103,7 @@ export default function BackgroundList({ tracks, selectedId, onSelect, onAddFile
           <button
             onClick={() => fileInputRef.current?.click()}
             className={`${CSS_CLASSES.iconButton} text-green-600 dark:text-green-400`}
-            title="Add audio file(s)"
+            title={t('audioEffects.addAudioFile')}
           >
             <FontAwesomeIcon icon={faPlus} className="h-4 w-4" />
           </button>
@@ -112,7 +114,7 @@ export default function BackgroundList({ tracks, selectedId, onSelect, onAddFile
       <div className="flex-1 min-h-0">
         {tracks.length === 0 ? (
           <div className="text-center py-8 text-slate-500 dark:text-gray-400 text-sm">
-            No background tracks yet. Use the + button to add audio files.
+            {t('audioEffects.noBackgroundTracks')}
           </div>
         ) : (
           <div className="space-y-1">

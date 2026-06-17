@@ -3,6 +3,12 @@ import { AppGuiSettingState } from "../../scripts/useAppGuiSetting";
 import { CSS_CLASSES } from "../../styles/constants";
 import { ClientState } from "@dannadori/voice-changer-client-js";
 import { F0Detector } from "@dannadori/voice-changer-client-js";
+import { useTranslation } from "react-i18next";
+
+interface ExtendedServerSetting {
+    pitchExtractors?: Record<string, { downloaded: boolean; name: string }>;
+    f0Detector?: string;
+}
 
 interface F0ExtractionProps {
     appState: ClientState;
@@ -13,6 +19,7 @@ interface F0ExtractionProps {
 // Use pitchExtractors from server settings instead of hardcoded list
 
 function F0Extraction({ appState, uiState, appGuiSettingState }: F0ExtractionProps) {
+    const { t } = useTranslation();
     // ---------------- Handlers ----------------
 
     // Handle F0 Detector Change
@@ -29,7 +36,8 @@ function F0Extraction({ appState, uiState, appGuiSettingState }: F0ExtractionPro
 
     // Generate F0 Detectors Options for Select
     const generateF0DetOptions = () => {
-        const pitchExtractors = appState.serverSetting.serverSetting.pitchExtractors || {};
+        const serverSetting = appState.serverSetting.serverSetting as unknown as ExtendedServerSetting;
+        const pitchExtractors = serverSetting.pitchExtractors || {};
         
         // Get all available extractors and filter for downloaded ones
         let extractors = Object.entries(pitchExtractors)
@@ -42,7 +50,7 @@ function F0Extraction({ appState, uiState, appGuiSettingState }: F0ExtractionPro
         
         // If no downloaded extractors are available
         if (extractors.length === 0) {
-            return <option value="">No downloaded pitch extractors available</option>;
+            return <option value="">{t('aiSettings.noPitchExtractors')}</option>;
         }
         
         // Map to options
@@ -57,7 +65,7 @@ function F0Extraction({ appState, uiState, appGuiSettingState }: F0ExtractionPro
 
     return (
         <div>
-            <label htmlFor="f0Detector" className={CSS_CLASSES.label}>Pitch Extraction Algorithm</label>
+            <label htmlFor="f0Detector" className={CSS_CLASSES.label}>{t('aiSettings.f0Detector')}</label>
             <select
                 id="f0Detector"
                 className={CSS_CLASSES.select}

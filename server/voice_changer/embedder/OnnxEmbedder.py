@@ -1,5 +1,5 @@
 import torch
-from voice_changer.common.OnnxLoader import load_onnx_model
+from voice_changer.common.OnnxLoader import load_onnx_model, safe_creation
 from voice_changer.common.deviceManager.DeviceManager import DeviceManager
 from voice_changer.embedder.Embedder import Embedder
 import onnxruntime
@@ -24,7 +24,7 @@ class OnnxEmbedder(Embedder):
         # so.add_free_dimension_override_by_name('audio_dynamic_axes_1', 45600)
         self.fp_dtype_t = torch.float16 if self.is_half else torch.float32
         self.fp_dtype_np = np.float16 if self.is_half else np.float32
-        self.onnx_session = onnxruntime.InferenceSession(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
+        self.onnx_session = safe_creation(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
         super().set_props(self.embedderType, file)
         return self
 

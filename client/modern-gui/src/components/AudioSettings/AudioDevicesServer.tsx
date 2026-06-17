@@ -2,10 +2,27 @@ import React, { useEffect, useMemo } from 'react';
 import { CSS_CLASSES } from '../../styles/constants';
 import { useAppState } from '../../context/AppContext';
 import { useState } from 'react';
-import { ServerAudioDevice } from '@dannadori/voice-changer-client-js/const';
 import { useUIContext } from '../../context/UIContext';
+import { useTranslation } from 'react-i18next';
+import { ServerInfo } from '@dannadori/voice-changer-client-js';
+
+export interface ExtendedServerAudioDevice {
+  name: string;
+  index: number;
+  hostAPI?: string;
+  maxInputChannels?: number;
+  maxOutputChannels?: number;
+}
+
+export interface ExtendedServerInfo extends Omit<ServerInfo, 'serverAudioInputDevices' | 'serverAudioOutputDevices'> {
+  asioInputChannel?: number;
+  asioOutputChannel?: number;
+  serverAudioInputDevices?: ExtendedServerAudioDevice[];
+  serverAudioOutputDevices?: ExtendedServerAudioDevice[];
+}
 
 function AudioDevicesServer() {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const uiState = useUIContext();
@@ -21,27 +38,35 @@ function AudioDevicesServer() {
 
   // Get Server Input Devices based on selected Audio Driver
   const serverInputDevices = useMemo(() => {
-    return appState.serverSetting?.serverSetting?.serverAudioInputDevices
+    const serverSetting = appState.serverSetting?.serverSetting as ExtendedServerInfo;
+    const devices = serverSetting?.serverAudioInputDevices || [];
+    return (devices as ExtendedServerAudioDevice[])
       .filter(device => device.hostAPI === selectedAudioDriver);
   }, [appState.serverSetting, selectedAudioDriver]);
 
   // Get Server Output Devices based on selected Audio Driver
   const serverOutputDevices = useMemo(() => {
-    return appState.serverSetting?.serverSetting?.serverAudioOutputDevices
+    const serverSetting = appState.serverSetting?.serverSetting as ExtendedServerInfo;
+    const devices = serverSetting?.serverAudioOutputDevices || [];
+    return (devices as ExtendedServerAudioDevice[])
       .filter(device => device.hostAPI === selectedAudioDriver);
   }, [appState.serverSetting, selectedAudioDriver]);
 
   // Get Server Monitor Devices based on selected Monitor Audio Driver
   const serverMonitorDevices = useMemo(() => {
     if (!selectedMonitorAudioDriver) return [];
-    return appState.serverSetting?.serverSetting?.serverAudioOutputDevices
+    const serverSetting = appState.serverSetting?.serverSetting as ExtendedServerInfo;
+    const devices = serverSetting?.serverAudioOutputDevices || [];
+    return (devices as ExtendedServerAudioDevice[])
       .filter(device => device.hostAPI === selectedMonitorAudioDriver);
   }, [appState.serverSetting, selectedMonitorAudioDriver]);
 
   // Set selected monitor audio driver based on selected audio driver
   useEffect(() => {
+    const serverSetting = appState.serverSetting?.serverSetting as ExtendedServerInfo;
+    const devices = serverSetting?.serverAudioOutputDevices || [];
     if (availableAudioDrivers.length > 0) {
-      const monitor = appState.serverSetting.serverSetting.serverAudioOutputDevices.find(x => x.index === appState.serverSetting.serverSetting.serverMonitorDeviceId);
+      const monitor = devices.find(x => x.index === serverSetting?.serverMonitorDeviceId);
       setSelectedMonitorAudioDriver(availableAudioDrivers.find(x => x === monitor?.hostAPI) || availableAudioDrivers[0]);
     }
   }, [availableAudioDrivers]);
@@ -106,7 +131,7 @@ function AudioDevicesServer() {
     appState.serverSetting.updateServerSettings({
       ...appState.serverSetting.serverSetting,
       asioInputChannel: parseInt(event.target.value)
-    });
+    } as any);
   };
 
   // Handle Output Channel Change
@@ -114,7 +139,7 @@ function AudioDevicesServer() {
     appState.serverSetting.updateServerSettings({
       ...appState.serverSetting.serverSetting,
       asioOutputChannel: parseInt(event.target.value)
-    });
+    } as any);
   };
 
   // Handle Monitor Audio Driver Change
@@ -128,9 +153,9 @@ function AudioDevicesServer() {
   // Method to fetch server devices
   const fetchServerDevices = async () => {
     try {
-      const serverSettings = appState.serverSetting.serverSetting;
-      const inputs: ServerAudioDevice[] = serverSettings.serverAudioInputDevices || [];
-      const outputs: ServerAudioDevice[] = serverSettings.serverAudioOutputDevices || [];
+      const serverSettings = appState.serverSetting.serverSetting as ExtendedServerInfo;
+      const inputs: ExtendedServerAudioDevice[] = serverSettings.serverAudioInputDevices || [];
+      const outputs: ExtendedServerAudioDevice[] = serverSettings.serverAudioOutputDevices || [];
 
       // Extract unique hostAPIs for Audio Driver dropdown
       const hostApis = new Set<string>();
@@ -141,7 +166,7 @@ function AudioDevicesServer() {
 
       // Set selected audio driver based on server input device
       if (uniqueHostApis.length > 0) {
-        const input = appState.serverSetting.serverSetting.serverAudioInputDevices.find(x => x.index === appState.serverSetting.serverSetting.serverInputDeviceId);
+        const input = inputs.find(x => x.index === serverSetting.serverInputDeviceId);
         setSelectedAudioDriver(uniqueHostApis.find(x => x === input?.hostAPI) || uniqueHostApis[0]);
       }
     } catch (err) {
@@ -151,18 +176,20 @@ function AudioDevicesServer() {
 
   // ---------------- Render ----------------
 
+  const serverSetting = appState.serverSetting.serverSetting as ExtendedServerInfo;
+
   return (
     <>
       <div>
-        <label htmlFor="sampleRate" className={CSS_CLASSES.label}>Sample Rate</label>
-        <select id="sampleRate" className={CSS_CLASSES.select} value={appState.serverSetting?.serverSetting?.serverInputAudioSampleRate} onChange={handleSampleRateChange}>
+        <label htmlFor="sampleRate" className={CSS_CLASSES.label}>{t('audioSettings.sampleRateLabel')}</label>
+        <select id="sampleRate" className={CSS_CLASSES.select} value={serverSetting?.serverInputAudioSampleRate} onChange={handleSampleRateChange}>
           {sampleRates.map(rate => (
             <option key={rate} value={rate}>{rate} Hz</option>
           ))}
         </select>
       </div>
       <div>
-        <label htmlFor="audioDriver" className={CSS_CLASSES.label}>Audio Driver</label>
+        <label htmlFor="audioDriver" className={CSS_CLASSES.label}>{t('audioSettings.audioDriverLabel')}</label>
         <select
           id="audioDriver"
           className={CSS_CLASSES.select}
@@ -170,7 +197,7 @@ function AudioDevicesServer() {
           onChange={handleAudioDriverChange}
         >
           {availableAudioDrivers.length === 0 ? (
-            <option value="">No drivers available</option>
+            <option value="">{t('audioSettings.noDriversAvailable')}</option>
           ) : (
             availableAudioDrivers.map(driver => (
               <option key={driver} value={driver}>{driver}</option>
@@ -183,22 +210,22 @@ function AudioDevicesServer() {
         <div className="flex items-end gap-2">
           <div className={selectedAudioDriver === 'ASIO' ? 'w-[70%]' : 'w-full'}>
             <label htmlFor="inputCh" className={CSS_CLASSES.label}>
-              Input Device
+              {t('audioSettings.inputDeviceLabel')}
             </label>
             <select
               id="inputCh"
               className={`${CSS_CLASSES.select} w-full`}
-              value={appState.serverSetting.serverSetting.serverInputDeviceId}
+              value={serverSetting.serverInputDeviceId}
               onChange={handleInputDeviceChange}
             >
               {
                 serverInputDevices.length === 0 ? (
-                  <option value={-1}>No input devices found</option>
+                  <option value={-1}>{t('audioSettings.noInputDevicesFound')}</option>
                 ) : (
                   <>
                     {
-                      !serverInputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverInputDeviceId) && (
-                        <option value={-1}>No device selected</option>
+                      !serverInputDevices.find(device => device.index === serverSetting.serverInputDeviceId) && (
+                        <option value={-1}>{t('audioSettings.noDeviceSelected')}</option>
                       )
                     }
                     {
@@ -218,21 +245,21 @@ function AudioDevicesServer() {
           </div>
 
           {/* Input Channel (only visible when ASIO is selected) - 30% width */}
-          {selectedAudioDriver === 'ASIO' && serverInputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverInputDeviceId) && (
+          {selectedAudioDriver === 'ASIO' && serverInputDevices.find(device => device.index === serverSetting.serverInputDeviceId) && (
             <div className="w-[30%]">
               <label htmlFor="inputChannel" className={CSS_CLASSES.label}>
-                Channel
+                {t('audioSettings.channelLabel')}
               </label>
               <select
                 id="inputChannel"
                 className={`${CSS_CLASSES.select} w-full`}
-                value={appState.serverSetting.serverSetting.asioInputChannel}
+                value={serverSetting.asioInputChannel}
                 onChange={handleInputChannelChange}
               >
-                <option value={-1}>Default</option>
+                <option value={-1}>{t('audioSettings.defaultChannel')}</option>
                 {
                   Array.from({
-                    length: serverInputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverInputDeviceId)?.maxInputChannels || 0
+                    length: serverInputDevices.find(device => device.index === serverSetting.serverInputDeviceId)?.maxInputChannels || 0
                   },
                     (_, index) => (
                       <option key={index} value={index}>{index}</option>
@@ -250,22 +277,22 @@ function AudioDevicesServer() {
           {/* Output Device - 70% width */}
           <div className={selectedAudioDriver === 'ASIO' ? 'w-[70%]' : 'w-full'}>
             <label htmlFor="outputCh" className={CSS_CLASSES.label}>
-              Output Device
+              {t('audioSettings.outputDeviceLabel')}
             </label>
             <select
               id="outputCh"
               className={`${CSS_CLASSES.select} w-full`}
-              value={appState.serverSetting.serverSetting.serverOutputDeviceId}
+              value={serverSetting.serverOutputDeviceId}
               onChange={handleOutputDeviceChange}
             >
               {
                 serverOutputDevices.length === 0 ? (
-                  <option value={-1}>No output devices found</option>
+                  <option value={-1}>{t('audioSettings.noOutputDevicesFound')}</option>
                 ) : (
                   <>
                     {
-                      !serverOutputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverOutputDeviceId) && (
-                        <option value={-1}>No device selected</option>
+                      !serverOutputDevices.find(device => device.index === serverSetting.serverOutputDeviceId) && (
+                        <option value={-1}>{t('audioSettings.noDeviceSelected')}</option>
                       )
                     }
                     {
@@ -285,21 +312,21 @@ function AudioDevicesServer() {
           </div>
 
           {/* Output Channel (only visible when ASIO is selected) - 30% width */}
-          {selectedAudioDriver === 'ASIO' && serverOutputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverOutputDeviceId) && (
+          {selectedAudioDriver === 'ASIO' && serverOutputDevices.find(device => device.index === serverSetting.serverOutputDeviceId) && (
             <div className="w-[30%]">
               <label htmlFor="outputChannel" className={CSS_CLASSES.label}>
-                Channel
+                {t('audioSettings.channelLabel')}
               </label>
               <select
                 id="outputChannel"
                 className={`${CSS_CLASSES.select} w-full`}
-                value={appState.serverSetting.serverSetting.asioOutputChannel}
+                value={serverSetting.asioOutputChannel}
                 onChange={handleOutputChannelChange}
               >
-                <option value={-1}>Default</option>
+                <option value={-1}>{t('audioSettings.defaultChannel')}</option>
                 {
                   Array.from({
-                    length: serverOutputDevices.find(device => device.index === appState.serverSetting.serverSetting.serverOutputDeviceId)?.maxOutputChannels || 0
+                    length: serverOutputDevices.find(device => device.index === serverSetting.serverOutputDeviceId)?.maxOutputChannels || 0
                   },
                     (_, index) => (
                       <option key={index} value={index}>{index}</option>
@@ -317,7 +344,7 @@ function AudioDevicesServer() {
         {/* Monitor Audio Driver Selector - 30% width */}
         <div className="w-[30%]">
           <label htmlFor="monitorAudioDriver" className={CSS_CLASSES.label}>
-            Monitor Driver
+            {t('audioSettings.monitorDriverLabel')}
           </label>
           <select
             id="monitorAudioDriver"
@@ -326,7 +353,7 @@ function AudioDevicesServer() {
             onChange={handleMonitorAudioDriverChange}
           >
             {availableAudioDrivers.length === 0 ? (
-              <option value="">No drivers available</option>
+              <option value="">{t('audioSettings.noDriversAvailable')}</option>
             ) : (
               availableAudioDrivers.map(driver => (
                 <option key={driver} value={driver}>{driver}</option>
@@ -338,7 +365,7 @@ function AudioDevicesServer() {
         {/* Monitor Device Selector - 70% width */}
         <div className="w-[70%]">
           <label htmlFor="monCh" className={CSS_CLASSES.label}>
-            Monitor Device
+            {t('audioSettings.monitorDeviceLabel')}
           </label>
           <select
             id="monCh"
@@ -349,10 +376,10 @@ function AudioDevicesServer() {
           >
             {
               serverMonitorDevices.length === 0 ? (
-                <option value={-1}>No devices for driver</option>
+                <option value={-1}>{t('audioSettings.noDevicesForDriver')}</option>
               ) : (
                 <>
-                  <option value={-1}>No device selected</option>
+                  <option value={-1}>{t('audioSettings.noDeviceSelected')}</option>
                   {
                     serverMonitorDevices.map((device) => (
                       <option

@@ -3,12 +3,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen } from "@fortawesome/free-solid-svg-icons";
 import { useState } from "react";
 import EditModelModal from "../LeftSideBar/Modals/EditModelModal";
+import { useTranslation } from "react-i18next";
+
+interface ExtendedRVCModelSlot extends RVCModelSlot {
+  isONNX?: boolean;
+  modelTypeOnnx?: string;
+  embedder?: string;
+}
 
 interface ModelInfoProps {
-  model: RVCModelSlot;
+  model: ExtendedRVCModelSlot;
   icon: string;
 }
 function ModelInfo({ model, icon }: ModelInfoProps) {
+  const { t } = useTranslation();
   // ---------------- State ----------------
   const [showEdit, setShowEdit] = useState<boolean>(false);
 
@@ -42,20 +50,20 @@ function ModelInfo({ model, icon }: ModelInfoProps) {
                   <button
                     onClick={() => setShowEdit(true)}
                     className="p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full"
-                    title="Edit Model"
+                    title={t('modelSettings.editModel')}
                   >
                     <FontAwesomeIcon icon={faPen} className="h-4 w-4" />
                   </button>
                 </div>
                 <div className="space-y-1">
                   <div className="text-xs text-slate-600 dark:text-gray-400">
-                    <span className="font-semibold">Embedder:</span> {model.embedder || 'N/A'}
+                    <span className="font-semibold">{t('modelSettings.embedder')}:</span> {model.embedder || 'N/A'}
                   </div>
                   <div className="text-xs text-slate-600 dark:text-gray-400">
-                    <span className="font-semibold">Model Type:</span> {modelTypeDisplay || 'N/A'}
+                    <span className="font-semibold">{t('modelSettings.modelType')}:</span> {modelTypeDisplay || 'N/A'}
                   </div>
                   <div className="text-xs text-slate-600 dark:text-gray-400">
-                    <span className="font-semibold">Sample Rate:</span> {model.samplingRate ? `${model.samplingRate / 1000} kHz` : 'N/A'}
+                    <span className="font-semibold">{t('modelSettings.sampleRate')}:</span> {model.samplingRate ? `${model.samplingRate / 1000} kHz` : 'N/A'}
                   </div>
                 </div>
               </div>
@@ -64,7 +72,11 @@ function ModelInfo({ model, icon }: ModelInfoProps) {
         </>
       ) : (
         <div className="flex items-center justify-center mb-6 p-8 bg-slate-100 dark:bg-gray-700/50 rounded-lg min-h-[160px]">
-          <p className="text-slate-500 dark:text-gray-400 italic text-center">Select a model from the list <br /> to see its settings.</p>
+          <p className="text-slate-500 dark:text-gray-400 italic text-center">
+            {t('modelSettings.selectModelPrompt').split('\n').map((line, i) => (
+              <span key={i}>{line}<br /></span>
+            ))}
+          </p>
         </div>
       )}
     </>

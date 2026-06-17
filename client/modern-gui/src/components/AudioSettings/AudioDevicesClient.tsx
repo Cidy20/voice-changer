@@ -3,8 +3,10 @@ import { AUDIO_KEYS, CSS_CLASSES, INDEXEDDB_KEYS } from '../../styles/constants'
 import { useAppState } from '../../context/AppContext';
 import { useIndexedDB } from '@dannadori/voice-changer-client-js';
 import { useUIContext } from '../../context/UIContext';
+import { useTranslation } from 'react-i18next';
 
 function AudioDevicesClient(): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const uiState = useUIContext();
@@ -159,7 +161,7 @@ function AudioDevicesClient(): JSX.Element {
       {/* Input Device */}
       <div>
         <label htmlFor="inputCh" className={CSS_CLASSES.label}>
-          Input Device
+          {t('audioSettings.inputDeviceLabel')}
         </label>
         <select
           id="inputCh"
@@ -169,7 +171,7 @@ function AudioDevicesClient(): JSX.Element {
         >
           {
             uiState.inputAudioDeviceInfo.length === 0 ? (
-              <option value="">No input devices found</option>
+              <option value="">{t('audioSettings.noInputDevicesFound')}</option>
             ) : (
               uiState.inputAudioDeviceInfo.map((device) => (
                 <option
@@ -187,7 +189,7 @@ function AudioDevicesClient(): JSX.Element {
       {/* Output Device */}
       <div>
         <label htmlFor="outputCh" className={CSS_CLASSES.label}>
-          Output Device
+          {t('audioSettings.outputDeviceLabel')}
         </label>
         <select
           id="outputCh"
@@ -197,7 +199,7 @@ function AudioDevicesClient(): JSX.Element {
         >
           {
             uiState.outputAudioDeviceInfo.length === 0 ? (
-              <option value="">No output devices found</option>
+              <option value="">{t('audioSettings.noOutputDevicesFound')}</option>
             ) : (
               uiState.outputAudioDeviceInfo.map((device) => (
                 <option
@@ -215,7 +217,7 @@ function AudioDevicesClient(): JSX.Element {
       {/* Monitor Device */}
       <div>
         <label htmlFor="monCh" className={CSS_CLASSES.label}>
-          Monitor Device
+          {t('audioSettings.monitorDeviceLabel')}
         </label>
         <select
           id="monCh"
@@ -225,10 +227,10 @@ function AudioDevicesClient(): JSX.Element {
         >
           {
             uiState.outputAudioDeviceInfo.length === 0 ? (
-              <option value="">No output devices found</option>
+              <option value="">{t('audioSettings.noOutputDevicesFound')}</option>
             ) : (
               <>
-                <option value="none">No device selected</option>
+                <option value="none">{t('audioSettings.noDeviceSelected')}</option>
                 {
                   uiState.outputAudioDeviceInfo.map((device) => (
                     <option

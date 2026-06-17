@@ -2,6 +2,7 @@ import { JSX, useState, useRef, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faPause, faVolumeUp, faVolumeMute, faDownload } from '@fortawesome/free-solid-svg-icons';
 import { CSS_CLASSES } from '../../styles/constants';
+import { useTranslation } from 'react-i18next';
 
 interface AudioPlayerProps {
   src: string;
@@ -14,6 +15,7 @@ interface AudioPlayerProps {
 }
 
 function AudioPlayer({ src, title, className = '', id, outputDeviceId, modelName, audioType }: AudioPlayerProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -302,7 +304,7 @@ function AudioPlayer({ src, title, className = '', id, outputDeviceId, modelName
         <button
           onClick={handleDownload}
           className={`${CSS_CLASSES.iconButton} hover:bg-slate-100 dark:hover:bg-gray-700 p-2 rounded flex-shrink-0`}
-          title="Download Audio"
+          title={t('aiSettings.downloadAudio')}
         >
           <FontAwesomeIcon icon={faDownload} className="text-sm" />
         </button>

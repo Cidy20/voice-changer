@@ -3,24 +3,26 @@ import { faFilter, faSearch, faSort, faTimes, faArrowUpAZ, faArrowDownAZ } from 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMemo, useState, useEffect } from "react";
 import { CSS_CLASSES } from "../../styles/constants";
+import { useTranslation } from "react-i18next";
+
+export interface ExtendedRVCModelSlot extends RVCModelSlot {
+  embedder?: string;
+  version?: string;
+}
 
 interface ModelFilterProps {
   appState: ClientState;
-  setFilteredAndSortedModels: (models: RVCModelSlot[]) => void;
+  setFilteredAndSortedModels: (models: ExtendedRVCModelSlot[]) => void;
 }
 
 type SortOption = 'slot' | 'name';
 type SampleRateFilter = number | 'All';
 
-const sortOptions: { value: SortOption, label: string }[] = [
-  { value: 'slot', label: 'Slot' },
-  { value: 'name', label: 'Name' },
-];
-
 function ModelFilter({
   appState,
   setFilteredAndSortedModels
 }: ModelFilterProps) {
+  const { t } = useTranslation();
   // ---------------- State ----------------
   const [searchTerm, setSearchTerm] = useState('');
   const [currentSort, setCurrentSort] = useState<SortOption>('slot');
@@ -30,18 +32,23 @@ function ModelFilter({
   const [isSortFilterVisible, setIsSortFilterVisible] = useState(false);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+  const sortOptions = useMemo(() => [
+    { value: 'slot' as SortOption, label: t('sidebar.sortSlot') },
+    { value: 'name' as SortOption, label: t('sidebar.sortName') },
+  ], [t]);
+
   // ---------------- Hooks ----------------
 
   // Extract and validate RVC models from server state
-  const localModels: RVCModelSlot[] = useMemo(() => {
+  const localModels: ExtendedRVCModelSlot[] = useMemo(() => {
     if (appState.serverSetting?.serverSetting?.modelSlots) {
-      return appState.serverSetting.serverSetting.modelSlots
-        .filter((slot: ModelSlotUnion): slot is RVCModelSlot =>
+      return (appState.serverSetting.serverSetting.modelSlots as any[])
+        .filter((slot) =>
           slot.voiceChangerType === VoiceChangerType.RVC &&
           slot.name !== "" &&
           typeof slot.slotIndex === 'number'
         )
-        .map((slot: RVCModelSlot): RVCModelSlot => ({
+        .map((slot): ExtendedRVCModelSlot => ({
           ...slot,
           slotIndex: slot.slotIndex as number,
         }));
@@ -109,7 +116,7 @@ function ModelFilter({
     processedModels.sort((a, b) => {
       let comparison = 0;
       if (currentSort === 'slot') {
-        comparison = a.slotIndex - b.slotIndex;
+        comparison = (a.slotIndex as number) - (b.slotIndex as number);
       } else if (currentSort === 'name') {
         comparison = a.name.localeCompare(b.name);
       }
@@ -131,7 +138,7 @@ function ModelFilter({
       <div className="relative mb-2">
         <input
           type="search"
-          placeholder="Search Models..."
+          placeholder={t('sidebar.searchModels')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 pr-10 border border-slate-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-sm placeholder-slate-400 dark:placeholder-gray-500 text-slate-700 dark:text-slate-100 [&::-webkit-search-cancel-button]:appearance-none [&::-webkit-search-cancel-button]:hidden"
@@ -145,7 +152,7 @@ function ModelFilter({
           onClick={() => setIsSortFilterVisible(!isSortFilterVisible)}
           className="w-full flex items-center justify-between p-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-gray-700 rounded-md border border-slate-300 dark:border-gray-600"
         >
-          <span><FontAwesomeIcon icon={faFilter} className="mr-2" /> Filter & Sort</span>
+          <span><FontAwesomeIcon icon={faFilter} className="mr-2" /> {t('sidebar.filterAndSort')}</span>
           <FontAwesomeIcon icon={isSortFilterVisible ? faTimes : faSort} />
         </button>
       </div>
@@ -155,7 +162,7 @@ function ModelFilter({
         <div className="space-y-3 mb-3 p-3 border border-slate-200 dark:border-gray-700 rounded-md">
           {/* Sort Controls */}
           <div className="space-y-1 pb-2 border-b border-slate-200 dark:border-gray-700">
-            <label htmlFor="sortOption" className="text-xs font-medium text-slate-600 dark:text-gray-300 flex items-center"><FontAwesomeIcon icon={faSort} className="mr-1.5" />Sort by:</label>
+            <label htmlFor="sortOption" className="text-xs font-medium text-slate-600 dark:text-gray-300 flex items-center"><FontAwesomeIcon icon={faSort} className="mr-1.5" />{t('sidebar.sortBy')}</label>
             <div className="flex gap-2 items-center">
               <select id="sortOption" value={currentSort} onChange={(e) => setCurrentSort(e.target.value as SortOption)} className={`${CSS_CLASSES.select} flex-grow`}>
                 {sortOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
@@ -163,7 +170,7 @@ function ModelFilter({
               <button
                 onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
                 className="p-1.5 border border-slate-300 dark:border-gray-600 rounded-md hover:bg-slate-50 dark:hover:bg-gray-600 text-slate-600 dark:text-gray-300"
-                title={sortDirection === 'asc' ? "Sort Descending" : "Sort Ascending"}
+                title={sortDirection === 'asc' ? t('sidebar.sortDescending') : t('sidebar.sortAscending')}
               >
                 <FontAwesomeIcon icon={sortDirection === 'asc' ? faArrowUpAZ : faArrowDownAZ} className="text-xs" />
               </button>
@@ -172,30 +179,30 @@ function ModelFilter({
 
           {/* Filter Controls */}
           <div className="space-y-1 pt-2">
-            <p className="text-xs font-medium text-slate-600 dark:text-gray-300 flex items-center mb-1"><FontAwesomeIcon icon={faFilter} className="mr-1.5" />Filter by:</p>
+            <p className="text-xs font-medium text-slate-600 dark:text-gray-300 flex items-center mb-1"><FontAwesomeIcon icon={faFilter} className="mr-1.5" />{t('sidebar.filterBy')}</p>
             <div className="grid grid-cols-2 gap-2 items-center">
-              <label htmlFor="typeVersionFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">Type:</label>
+              <label htmlFor="typeVersionFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">{t('sidebar.filterType')}</label>
               <select id="typeVersionFilter" value={typeVersionFilter} onChange={(e) => setTypeVersionFilter(e.target.value)} className={CSS_CLASSES.select}>
-                {modelTypeVersionOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {modelTypeVersionOptions.map(opt => <option key={opt} value={opt}>{opt === 'All' ? t('sidebar.all') : opt}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-2 items-center">
-              <label htmlFor="rateFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">Rate:</label>
+              <label htmlFor="rateFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">{t('sidebar.filterRate')}</label>
               <select id="rateFilter" value={rateFilter === 'All' ? 'All' : rateFilter} onChange={(e) => setRateFilter(e.target.value === 'All' ? 'All' : Number(e.target.value) as SampleRateFilter)} className={CSS_CLASSES.select}>
-                {sampleRateOptions.map(opt => <option key={opt} value={opt}>{opt === 'All' ? 'All' : `${opt / 1000}kHz`}</option>)}
+                {sampleRateOptions.map(opt => <option key={opt} value={opt}>{opt === 'All' ? t('sidebar.all') : `${opt / 1000}kHz`}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-2 items-center">
-              <label htmlFor="embedderFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">Embedder:</label>
+              <label htmlFor="embedderFilter" className="text-xs font-medium text-slate-500 dark:text-gray-400">{t('sidebar.filterEmbedder')}</label>
               <select id="embedderFilter" value={embedderFilter} onChange={(e) => setEmbedderFilter(e.target.value)} className={CSS_CLASSES.select}>
-                {embedderOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                {embedderOptions.map(opt => <option key={opt} value={opt}>{opt === 'All' ? t('sidebar.all') : opt}</option>)}
               </select>
             </div>
           </div>
         </div>
       )}
     </>
-  )
+  );
 }
 
 export default ModelFilter;

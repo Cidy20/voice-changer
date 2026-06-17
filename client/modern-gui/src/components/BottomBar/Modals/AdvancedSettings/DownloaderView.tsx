@@ -3,27 +3,42 @@ import { useAppState } from '../../../../context/AppContext';
 import { useUIContext } from '../../../../context/UIContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faDownload, faTrash, faSpinner, faCheck } from '@fortawesome/free-solid-svg-icons';
-import { ModelInfoDict } from '@dannadori/voice-changer-client-js';
+import { useTranslation } from 'react-i18next';
+import { ServerInfo } from '@dannadori/voice-changer-client-js';
+
+export type ModelInfoDict = Record<string, {
+  name?: string;
+  mandatory?: boolean;
+  [key: string]: any;
+}>;
+
+interface ExtendedServerInfo extends ServerInfo {
+  embedders?: ModelInfoDict;
+  pitchExtractors?: ModelInfoDict;
+}
 
 interface DownloaderViewProps {
   onDownloadStateChange?: (isDownloading: boolean) => void;
 }
 
 const DownloaderView = (props: DownloaderViewProps) => {
+  const { t } = useTranslation();
   const appState = useAppState();
   const uiState = useUIContext();
   const { onDownloadStateChange } = props;
 
+  const serverSetting = appState.serverSetting.serverSetting as ExtendedServerInfo;
+
   const [loadingItems, setLoadingItems] = useState<Record<string, 'download' | 'delete' | null>>({});
   const [isAnyDownloading, setIsAnyDownloading] = useState(false);
-  const [embedders, setEmbedders] = useState<ModelInfoDict>(appState.serverSetting.serverSetting.embedders || {});
-  const [pitchExtractors, setPitchExtractors] = useState<ModelInfoDict>(appState.serverSetting.serverSetting.pitchExtractors || {});
+  const [embedders, setEmbedders] = useState<ModelInfoDict>(serverSetting.embedders || {});
+  const [pitchExtractors, setPitchExtractors] = useState<ModelInfoDict>(serverSetting.pitchExtractors || {});
 
   // Update local state when server settings change
   useEffect(() => {
-    const serverSetting = appState.serverSetting.serverSetting;
-    setEmbedders(serverSetting.embedders || {});
-    setPitchExtractors(serverSetting.pitchExtractors || {});
+    const currentSettings = appState.serverSetting.serverSetting as ExtendedServerInfo;
+    setEmbedders(currentSettings.embedders || {});
+    setPitchExtractors(currentSettings.pitchExtractors || {});
   }, [appState.serverSetting.serverSetting]);
 
   // Track download state changes and notify parent
@@ -60,25 +75,27 @@ const DownloaderView = (props: DownloaderViewProps) => {
       
       // The id is already the model key from the dictionary
       if (action === 'download') {
-        await appState.serverSetting.downloadPretrained(id);
+        await (appState.serverSetting as any).downloadPretrained(id);
       } else {
-        await appState.serverSetting.deletePretrained(id);
+        await (appState.serverSetting as any).deletePretrained(id);
       }
       
       // Refresh server info to update the installed status
       await appState.serverSetting.reloadServerInfo();
       
       // Show success message with model name
-      const actionText = action === 'download' ? 'downloaded' : 'deleted';
-      const modelType = type === 'embedder' ? 'Embedder' : 'Pitch Extractor';
+      const modelTypeStr = type === 'embedder' ? t('advancedSettings.embedderLabel') : t('advancedSettings.pitchExtractorLabel');
+      const actionText = action === 'download' ? t('advancedSettings.downloadSuccess') : t('advancedSettings.deleteSuccess');
       uiState.showError(
-        `${modelType} "${info.name || id}" ${actionText} successfully!`,
+        t('advancedSettings.actionSuccess', { type: modelTypeStr, name: info.name || id, action: actionText }),
         'Confirm'
       );
     } catch (error) {
       console.error(`Error ${action}ing ${type}:`, error);
+      const modelTypeStr = type === 'embedder' ? t('advancedSettings.embedderLabel') : t('advancedSettings.pitchExtractorLabel');
+      const actionText = action === 'download' ? t('advancedSettings.download') : t('advancedSettings.delete');
       uiState.showError(
-        `Failed to ${action} ${type}: ${error instanceof Error ? error.message : String(error)}`,
+        t('advancedSettings.actionFailed', { action: actionText, type: modelTypeStr, error: error instanceof Error ? error.message : String(error) }),
         'Error'
       );
     } finally {
@@ -136,11 +153,11 @@ const DownloaderView = (props: DownloaderViewProps) => {
           <span className="font-medium text-slate-800 dark:text-gray-200">{name}</span>
           {isInUse ? (
             <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300 rounded-full border border-purple-200 dark:border-purple-800">
-              In Use
+              {t('advancedSettings.inUse')}
             </span>
           ) : info.mandatory ? (
             <span className="ml-2 px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800">
-              Required
+              {t('advancedSettings.required')}
             </span>
           ) : null}
         </div>
@@ -149,7 +166,7 @@ const DownloaderView = (props: DownloaderViewProps) => {
             <>
               <span className="inline-flex items-center px-2.5 py-0.5 text-xs font-medium text-green-800 bg-green-100 dark:bg-green-900/50 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800">
                 <FontAwesomeIcon icon={faCheck} className="mr-1" />
-                Installed
+                {t('advancedSettings.installed')}
               </span>
               {!uiState.isConverting && !info.mandatory && !isInUse && (
                 <button
@@ -162,7 +179,7 @@ const DownloaderView = (props: DownloaderViewProps) => {
                   ) : (
                     <FontAwesomeIcon icon={faTrash} className="mr-1" />
                   )}
-                  Delete
+                  {t('advancedSettings.delete')}
                 </button>
               )}
             </>
@@ -181,12 +198,12 @@ const DownloaderView = (props: DownloaderViewProps) => {
               {isDownloading ? (
                 <>
                   <FontAwesomeIcon icon={faSpinner} className="animate-spin mr-1" />
-                  Downloading
+                  {t('advancedSettings.downloading')}
                 </>
               ) : (
                 <>
                   <FontAwesomeIcon icon={faDownload} className="mr-1" />
-                  Download
+                  {t('advancedSettings.download')}
                 </>
               )}
             </button>
@@ -214,7 +231,7 @@ const DownloaderView = (props: DownloaderViewProps) => {
   return (
     <div className="space-y-8">
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 pb-2 border-b border-slate-200 dark:border-gray-700">Embedders</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 pb-2 border-b border-slate-200 dark:border-gray-700">{t('advancedSettings.embedders')}</h3>
         <div className="space-y-3">
           {sortedEmbedders.length > 0 ? (
             <div className="bg-white dark:bg-gray-800/50 rounded-lg border border-slate-200 dark:border-gray-700 overflow-hidden">
@@ -222,14 +239,14 @@ const DownloaderView = (props: DownloaderViewProps) => {
             </div>
           ) : (
             <div className="text-center py-6 text-slate-500 dark:text-gray-400 bg-white dark:bg-gray-800/50 rounded-lg border border-slate-200 dark:border-gray-700">
-              No embedders available
+              {t('advancedSettings.noEmbeddersAvailable')}
             </div>
           )}
         </div>
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 pb-2 border-b border-slate-200 dark:border-gray-700">Pitch Extraction Algorithms</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-4 pb-2 border-b border-slate-200 dark:border-gray-700">{t('advancedSettings.pitchExtractionAlgorithms')}</h3>
         <div className="space-y-3">
           {sortedPitchExtractors.length > 0 ? (
             <div className="bg-white dark:bg-gray-800/50 rounded-lg border border-slate-200 dark:border-gray-700 overflow-hidden">
@@ -237,7 +254,7 @@ const DownloaderView = (props: DownloaderViewProps) => {
             </div>
           ) : (
             <div className="text-center py-6 text-slate-500 dark:text-gray-400 bg-white dark:bg-gray-800/50 rounded-lg border border-slate-200 dark:border-gray-700">
-              No pitch extraction algorithms available
+              {t('advancedSettings.noPitchAlgorithmsAvailable')}
             </div>
           )}
         </div>

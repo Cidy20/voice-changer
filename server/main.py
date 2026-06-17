@@ -2,19 +2,18 @@ import os
 import sys
 import multiprocessing as mp
 
-from const import ROOT_PATH, UPLOAD_DIR, TMP_DIR, LOG_FILE, get_version, get_edition
+# type: ignore
+from const import ROOT_PATH, UPLOAD_DIR, TMP_DIR, LOG_FILE, get_version, get_edition  # type: ignore
 
 import asyncio
 import logging
 import argparse
 import signal
-import asyncio
-from datetime import datetime
-from Exceptions import setup_event_loop
+from Exceptions import setup_event_loop  # type: ignore
 
-from downloader.ModelManager import ModelManager
-from settings import get_settings
-from webserver.server import WebServer
+from downloader.ModelManager import ModelManager  # type: ignore
+from settings import get_settings  # type: ignore
+from webserver.server import WebServer  # type: ignore
 
 # Add the project root to the Python path
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
@@ -145,6 +144,7 @@ def handle_exception(loop, context):
 
 if __name__ == "__main__":
     server = None
+    loop = None
     try:
         # Initialize settings and logger at the module level
         settings = get_settings()
@@ -179,6 +179,8 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("\nShutdown requested. Cleaning up...")
     except Exception as e:
+        if 'loop' in locals() and loop is not None:
+            pass  # Keep it safe
         if 'logger' in globals():
             logger.exception("An error occurred while running the server")
         else:
@@ -186,7 +188,7 @@ if __name__ == "__main__":
         raise e
     finally:
         # Clean up the event loop
-        if 'loop' in locals():
+        if loop is not None:
             tasks = asyncio.all_tasks(loop)
             if tasks:
                 loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))

@@ -2,7 +2,7 @@ import torch
 import onnxruntime
 import json
 from const import EnumInferenceTypes
-from voice_changer.common.OnnxLoader import load_onnx_model
+from voice_changer.common.OnnxLoader import load_onnx_model, safe_creation
 from voice_changer.common.deviceManager.DeviceManager import DeviceManager
 from voice_changer.RVC.inferencer.Inferencer import Inferencer
 import numpy as np
@@ -13,7 +13,7 @@ class OnnxRVCInferencer(Inferencer):
         (
             onnxProviders,
             onnxProviderOptions,
-        ) = DeviceManager.get_instance().get_onnx_execution_provider()
+        ) = DeviceManager.get_instance().get_onnx_execution_provider(require_static=True)
         self.is_half = device_manager.use_fp16()
 
         self.set_props(EnumInferenceTypes.onnxRVC, file)
@@ -26,7 +26,7 @@ class OnnxRVCInferencer(Inferencer):
         so = onnxruntime.SessionOptions()
         # so.log_severity_level = 3
         # so.enable_profiling = True
-        self.model = onnxruntime.InferenceSession(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
+        self.model = safe_creation(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
 
         metadata = json.loads(self.model.get_modelmeta().custom_metadata_map["metadata"])
         self.inferencerTypeVersion = metadata['version']

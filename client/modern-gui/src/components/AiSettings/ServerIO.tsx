@@ -5,12 +5,14 @@ import { AUDIO_KEYS, CSS_CLASSES } from '../../styles/constants';
 import { ClientState } from "@dannadori/voice-changer-client-js";
 import AudioPlayer from '../Helpers/AudioPlayer';
 import { useUIContext } from '../../context/UIContext';
+import { useTranslation } from 'react-i18next';
 
 interface ServerIOProps {
   appState: ClientState;
 }
 
 function ServerIO({ appState }: ServerIOProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const [isRecording, setIsRecording] = useState(false);
   const [recordingDuration, setRecordingDuration] = useState(0);
@@ -115,12 +117,12 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
       <div className="flex justify-between items-center mb-3">
         <h5 className="text-md font-medium text-slate-700 dark:text-gray-200">
           <FontAwesomeIcon icon={faMicrophone} className="mr-2" />
-          ServerIO Analyzer
+          {t('aiSettings.serverIO')}
         </h5>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           className={CSS_CLASSES.iconButton}
-          title={isCollapsed ? "Expand" : "Collapse"}
+          title={isCollapsed ? t('aiSettings.expand') : t('aiSettings.collapse')}
         >
           <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} className="h-4 w-4" />
         </button>
@@ -144,13 +146,13 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
               icon={isRecording ? faStop : faPlay}
               className="mr-1.5 text-xs"
             />
-            {isRecording ? 'Stop Recording' : 'Start Recording'}
+            {isRecording ? t('aiSettings.stopServerIORecord') : t('aiSettings.startServerIORecord')}
           </button>
 
           {isRecording && (
             <div className="flex items-center text-red-500">
               <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mr-2"></div>
-              <span className="text-xs">Recording... {formatDuration(recordingDuration)}</span>
+              <span className="text-xs">{t('aiSettings.serverIORecording')} {formatDuration(recordingDuration)}</span>
             </div>
           )}
         </div>
@@ -159,7 +161,7 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
         <div>
           <label className={CSS_CLASSES.label}>
             <FontAwesomeIcon icon={faVolumeUp} className="mr-2" />
-            Output Device:
+            {t('aiSettings.serverIOOutputDevice')}:
           </label>
           <select
             value={selectedOutputDevice}
@@ -168,7 +170,7 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
           >
             {outputAudioDeviceInfo.map((device) => (
               <option key={device.deviceId} value={device.deviceId}>
-                {device.label || `Output Device ${device.deviceId.slice(0, 8)}`}
+                {device.label || `${t('aiSettings.outputDevice')} ${device.deviceId.slice(0, 8)}`}
               </option>
             ))}
           </select>
@@ -178,14 +180,14 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Input Audio */}
           <div>
-            <label className={CSS_CLASSES.label}>Input Audio:</label>
+            <label className={CSS_CLASSES.label}>{t('aiSettings.serverIOInputAudio')}:</label>
             <AudioPlayer
               src="/tmp/in.wav"
-              title="Input Audio"
+              title={t('aiSettings.serverIOInputAudio')}
               id={AUDIO_KEYS.AUDIO_ELEMENT_FOR_SAMPLING_INPUT}
               outputDeviceId={audioOutputForAnalyzer}
               modelName={appState.serverSetting.serverSetting.modelSlotIndex !== undefined
-                ? appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex]?.name || 'Unknown'
+                ? appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex as number]?.name || 'Unknown'
                 : 'Unknown'}
               audioType="Input"
             />
@@ -193,14 +195,14 @@ function ServerIO({ appState }: ServerIOProps): JSX.Element {
 
           {/* Output Audio */}
           <div>
-            <label className={CSS_CLASSES.label}>Output Audio:</label>
+            <label className={CSS_CLASSES.label}>{t('aiSettings.serverIOOutputAudio')}:</label>
             <AudioPlayer
               src="/tmp/out.wav"
-              title="Output Audio"
+              title={t('aiSettings.serverIOOutputAudio')}
               id={AUDIO_KEYS.AUDIO_ELEMENT_FOR_SAMPLING_OUTPUT}
               outputDeviceId={audioOutputForAnalyzer}
               modelName={appState.serverSetting.serverSetting.modelSlotIndex !== undefined
-                ? appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex]?.name || 'Unknown'
+                ? appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex as number]?.name || 'Unknown'
                 : 'Unknown'}
               audioType="Output"
             />

@@ -2,6 +2,7 @@ import { ClientState } from "@dannadori/voice-changer-client-js";
 import { CSS_CLASSES } from "../../styles/constants";
 import { useEffect } from "react";
 import { INDEXEDDB_KEYS } from "../../styles/constants";
+import { useTranslation } from "react-i18next";
 
 interface NoiseReductionProps {
   appState: ClientState;
@@ -10,6 +11,7 @@ interface NoiseReductionProps {
 }
 
 function NoiseReduction({ appState, getItem, setItem }: NoiseReductionProps) {
+  const { t } = useTranslation();
   // ---------------- Handlers ----------------
 
   // Load Noise Reduction from Cache
@@ -73,7 +75,7 @@ function NoiseReduction({ appState, getItem, setItem }: NoiseReductionProps) {
 
   return (
     <div>
-      <label className={CSS_CLASSES.label}>Noise Reduction:</label>
+      <label className={CSS_CLASSES.label}>{t('aiSettings.noiseReduction')}:</label>
       <div className="space-y-1">
         <label className={CSS_CLASSES.checkboxLabel}>
           <input
@@ -83,7 +85,7 @@ function NoiseReduction({ appState, getItem, setItem }: NoiseReductionProps) {
             checked={appState.setting.voiceChangerClientSetting.echoCancel ?? false}
             onChange={(e) => handleChangeEchoCancel(e.target.checked)}
             disabled={appState.serverSetting.serverSetting.enableServerAudio === 1}
-          /> Echo Cancellation
+          /> {t('aiSettings.echoCancellation')}
         </label>
         <label className={CSS_CLASSES.checkboxLabel}>
           <input
@@ -93,7 +95,7 @@ function NoiseReduction({ appState, getItem, setItem }: NoiseReductionProps) {
             checked={appState.setting.voiceChangerClientSetting.noiseSuppression ?? false}
             onChange={(e) => handleChangeNoiseSuppression(e.target.checked)}
             disabled={appState.serverSetting.serverSetting.enableServerAudio === 1}
-          /> Noise Suppression
+          /> {t('aiSettings.noiseSuppression')}
         </label>
         <label className={CSS_CLASSES.checkboxLabel}>
           <input
@@ -103,7 +105,7 @@ function NoiseReduction({ appState, getItem, setItem }: NoiseReductionProps) {
             checked={appState.setting.voiceChangerClientSetting.noiseSuppression2 ?? false}
             onChange={(e) => handleChangeNoiseSuppression2(e.target.checked)}
             disabled={appState.serverSetting.serverSetting.enableServerAudio === 1}
-          /> Noise Suppression 2
+          /> {t('aiSettings.noiseSuppression2')}
         </label>
       </div>
     </div>

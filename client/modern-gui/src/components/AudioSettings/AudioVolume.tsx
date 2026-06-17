@@ -4,10 +4,12 @@ import { faMicrophone, faVolumeUp, faHeadphones } from '@fortawesome/free-solid-
 import { useAppState } from '../../context/AppContext';
 import { CSS_CLASSES } from '../../styles/constants';
 import DebouncedSlider from '../Helpers/DebouncedSlider';
+import { useTranslation } from 'react-i18next';
 
 // CSS Class Constants (can be moved to a shared file or passed as props if preferred)
 
 function AudioVolume(): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const [inputGain, setInputGain] = useState(1);
@@ -74,7 +76,7 @@ function AudioVolume(): JSX.Element {
       <div>
         <label htmlFor="inputGain" className={CSS_CLASSES.label}>
           <FontAwesomeIcon icon={faMicrophone} className="mr-2" />
-          Input Volume
+          {t('audioSettings.inputVolume')}
         </label>
         <DebouncedSlider
           id="inputGain"
@@ -91,7 +93,7 @@ function AudioVolume(): JSX.Element {
       <div>
         <label htmlFor="outputGain" className={CSS_CLASSES.label}>
           <FontAwesomeIcon icon={faVolumeUp} className="mr-2" />
-          Output Volume
+          {t('audioSettings.outputVolume')}
         </label>
         <DebouncedSlider
           id="outputGain"
@@ -108,7 +110,7 @@ function AudioVolume(): JSX.Element {
       <div>
         <label htmlFor="monitorGain" className={CSS_CLASSES.label}>
           <FontAwesomeIcon icon={faHeadphones} className="mr-2" />
-          Monitor Volume
+          {t('audioSettings.monitorVolume')}
         </label>
         <DebouncedSlider
           id="monitorGain"

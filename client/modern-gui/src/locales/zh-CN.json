@@ -1,0 +1,625 @@
+{
+  "sidebar": {
+    "modelSelector": "模型选择器",
+    "availableModels": "可用模型",
+    "uploadNewModel": "上传新模型",
+    "filterAndSort": "过滤与排序",
+    "searchModels": "搜索模型...",
+    "sortSlot": "插槽索引",
+    "sortName": "模型名称",
+    "sortBy": "排序方式:",
+    "sortDescending": "降序排列",
+    "sortAscending": "升序排列",
+    "filterBy": "筛选过滤:",
+    "filterType": "模型类型:",
+    "filterRate": "采样率:",
+    "filterEmbedder": "特征提取器:",
+    "all": "全部"
+  },
+  "bottomBar": {
+    "mergeLab": "模型融合",
+    "advancedSettings": "高级设置",
+    "startServer": "启动服务",
+    "stopServer": "停止服务",
+    "passthroughOn": "直通开启",
+    "passthroughOff": "直通关闭",
+    "serverInfo": "服务端信息",
+    "clientInfo": "客户端信息"
+  },
+  "modelSettings": {
+    "title": "模型配置",
+    "slotIndex": "模型插槽索引",
+    "samplingRate": "采样率",
+    "tune": "音调微调 (半音)",
+    "activeSlot": "当前插槽",
+    "modelSlot": "模型插槽",
+    "none": "无",
+    "saveSettings": "保存设置",
+    "selectModelPrompt": "从侧边栏选择一个模型 \n 以查看并修改其配置。",
+    "pitch": "音调微调 (半音):",
+    "formantShift": "声线共振峰:",
+    "indexRatio": "检索率 (Index Ratio):",
+    "speaker": "说话人角色:",
+    "noSpeakers": "无多角色选项",
+    "editModel": "编辑模型信息",
+    "embedder": "特征提取器 (Embedder)",
+    "modelType": "模型格式 (ONNX/PyTorch)",
+    "sampleRate": "目标采样率"
+  },
+  "performance": {
+    "title": "性能指标",
+    "latency": "延迟",
+    "cpu": "CPU 占用",
+    "gpu": "GPU 占用",
+    "fps": "帧率",
+    "recording": "录音",
+    "vol": "音量",
+    "ping": "网络响应 (Ping)",
+    "total": "总延迟",
+    "perf": "推理性能",
+    "stopRecording": "停止",
+    "startRecording": "记录性能",
+    "stopTitle": "停止记录并下载 CSV",
+    "startTitle": "开始记录性能日志",
+    "history": "历史步长"
+  },
+  "aiSettings": {
+    "title": "AI 推理配置",
+    "chunk": "推理分包大小 (Chunk)",
+    "extra": "额外预留大小 (Extra)",
+    "f0Detector": "音高提取器 (F0 Det.)",
+    "gpuConfig": "GPU 资源配置",
+    "noGpus": "无可用 GPU 加速设备",
+    "noPitchExtractors": "无已下载的音高提取器模型",
+    "noiseReduction": "降噪设置",
+    "echoCancellation": "回声消除",
+    "noiseSuppression": "噪声抑制 1",
+    "noiseSuppression2": "噪声抑制 2",
+    "serverIO": "音频流分析器",
+    "silentThreshold": "输入敏感度 (静音阈值)",
+    "startServerIORecord": "开始录制",
+    "stopServerIORecord": "停止录制",
+    "serverIORecording": "录制中...",
+    "serverIOOutputDevice": "分析器输出设备",
+    "serverIOInputAudio": "变声前音频 (Input)",
+    "serverIOOutputAudio": "变声后音频 (Output)",
+    "expand": "展开",
+    "collapse": "折叠",
+    "outputDevice": "输出设备",
+    "downloadAudio": "下载音频"
+  },
+  "audioSettings": {
+    "title": "音频设置",
+    "inputVolume": "输入音量",
+    "outputVolume": "输出音量",
+    "monitorVolume": "监听音量",
+    "audioProcessing": "音频处理方式",
+    "client": "客户端 (Client)",
+    "server": "服务端 (Server)",
+    "reloadDeviceList": "刷新设备列表",
+    "clientAudioNotAvailable": "客户端音频不可用",
+    "serverAudioNotAvailable": "服务端音频不可用",
+    "inputDeviceLabel": "输入设备",
+    "noInputDevicesFound": "未找到输入设备",
+    "outputDeviceLabel": "输出设备",
+    "noOutputDevicesFound": "未找到输出设备",
+    "monitorDeviceLabel": "监听设备",
+    "noDeviceSelected": "未选择设备",
+    "audioDriverLabel": "音频驱动",
+    "noDriversAvailable": "无可用的音频驱动",
+    "channelLabel": "通道",
+    "defaultChannel": "默认",
+    "monitorDriverLabel": "监听驱动",
+    "noDevicesForDriver": "该驱动下无可用设备",
+    "sampleRateLabel": "采样率:"
+  },
+  "audioEffects": {
+    "title": "音效调节",
+    "effects": "个活动音效",
+    "backgroundTracks": "个活动伴奏/背景音",
+    "input": "输入端 (Input)",
+    "output": "输出端 (Output)",
+    "background": "背景伴奏 (Background)",
+    "drag": "拖动",
+    "dragToReorder": "拖动以重新排序",
+    "disable": "禁用",
+    "enable": "启用",
+    "deleteEffect": "删除",
+    "chain": "处理链",
+    "signalFlowDirection": "信号流自上而下处理",
+    "addEffect": "添加音效",
+    "noEffectsAdded": "尚未添加{{channel}}音效。",
+    "clickAddPrompt": "点击右上角 + 按钮添加音效。",
+    "audioInputLabel": "音频输入端",
+    "fromProcessingLabel": "变声处理后",
+    "toProcessingLabel": "送入变声处理",
+    "audioOutputLabel": "音频输出端",
+    "addAudioEffect": "添加音效",
+    "cancel": "取消",
+    "chooseEffectPrompt": "为 {{channel}} 选择一个音效",
+    "searchEffectsPlaceholder": "搜索音效...",
+    "allProviders": "所有提供商 (共 {{count}} 个音效)",
+    "effectsCount": "共 {{count}} 个音效",
+    "noEffectsFound": "未找到任何音效",
+    "adjustSearchTerms": "请尝试调整您的搜索词",
+    "effectsShownCount": "已显示 {{shown}} 个音效，共 {{total}} 个",
+    "configuration": "配置",
+    "selectEffectToConfigure": "选择一个音效以配置其参数",
+    "unknownEffect": "未知音效",
+    "effectDefinitionNotFound": "未找到该类型的音效定义：{{type}}",
+    "effectTypeSuffix": "{{type}} 音效",
+    "channelLabelSuffix": "通道",
+    "enabled": "已启用",
+    "disabled": "已禁用",
+    "untitled": "未命名",
+    "backgroundTracksHeader": "背景伴奏 / 背景音",
+    "backgroundTracksSub": "背景音轨将与变声后的音频进行混合",
+    "addAudioFile": "添加音频文件",
+    "noBackgroundTracks": "尚未添加背景伴奏。点击右上角 + 按钮导入音频文件。",
+    "backgroundConfig": "背景音乐配置",
+    "selectBackgroundTrack": "请选择一条背景音轨",
+    "trackNameLabel": "名称",
+    "gainLabel": "增益",
+    "modeLabel": "播放模式",
+    "loopMode": "循环播放",
+    "randomMode": "随机播放",
+    "loopPauseLabel": "循环间隔 (秒)",
+    "minPauseLabel": "最小间隔 (秒)",
+    "maxPauseLabel": "最大间隔 (秒)",
+    "previewLabel": "试听",
+    "backgroundSoundUploadSuccess": "背景音乐上传成功！",
+    "pause": "间隔"
+  },
+  "uploadModel": {
+    "title": "上传模型",
+    "upload": "上传",
+    "uploading": "上传中...",
+    "cancel": "取消",
+    "errorSelectModel": "请选择一个模型文件。",
+    "errorTitle": "错误",
+    "errorEnterName": "请输入模型名称。",
+    "errorNoSlot": "没有空闲的模型插槽。请清空插槽或管理现有插槽。",
+    "successMessage": "模型上传成功！",
+    "confirmTitle": "确认",
+    "errorSaveFailed": "无法上传模型。模型文件未能成功保存。",
+    "swappingToModel": "正在切换到模型：",
+    "errorUploading": "上传模型出错：",
+    "modelFileLabel": "模型文件 (.pth, .safetensors, .onnx, .zip):",
+    "modelNameLabel": "模型名称:",
+    "modelNamePlaceholder": "输入一个便于识别的模型名称",
+    "embedderTypeLabel": "特征提取器类型:",
+    "noEmbedders": "无已下载的特征提取器",
+    "indexFileLabel": "索引文件 (.index) (可选):",
+    "thumbnailFileLabel": "缩略图 (可选):",
+    "previewThumbnail": "预览缩略图",
+    "previewMode": "预览模式:",
+    "previewSettings": "设置",
+    "previewList": "列表",
+    "selectAfterUpload": "上传后自动选择该模型"
+  },
+  "mergeLab": {
+    "title": "模型融合",
+    "merging": "融合中...",
+    "merge": "融合",
+    "close": "关闭",
+    "mergeSuccess": "模型融合成功！",
+    "downloadSuccess": "模型下载成功！",
+    "errorNoEmptySlot": "无空闲插槽用于保存。",
+    "uploadSuccess": "模型上传成功！",
+    "errorNoAction": "未选择任何操作。请至少选择一项操作。",
+    "errorMerging": "融合模型出错：",
+    "filterSettings": "过滤设置",
+    "searchModelsLabel": "搜索模型:",
+    "searchPlaceholder": "通过模型名称搜索...",
+    "sampleRateLabel": "采样率:",
+    "embedderLabel": "特征提取器:",
+    "noEmbedders": "无可用的特征提取器",
+    "mergeOptions": "融合选项",
+    "downloadMergedModel": "下载融合后的模型",
+    "saveToMergeSlot": "保存到融合插槽 (499)",
+    "saveToEmptySlot": "保存到空闲插槽 (自动选择首个可用)",
+    "noEmptySlotsAvailable": "无可用的空闲插槽",
+    "noModelsMatch": "未找到匹配过滤条件的模型。",
+    "selectedModelsCount": "已选模型数",
+    "totalWeight": "总权重"
+  },
+  "advancedSettings": {
+    "title": "高级设置",
+    "close": "关闭",
+    "tabSettings": "设置",
+    "tabDownloader": "下载器",
+    "protocolLabel": "传输协议 (Protocol)",
+    "crossfadeOverlapLabel": "淡入淡出重叠时长 (Crossfade Overlap)",
+    "silenceFrontLabel": "前导静音 (Silence Front)",
+    "forceFp32Label": "强制 FP32 模式",
+    "disableJitLabel": "禁用 JIT 编译",
+    "convertToOnnxLabel": "转换为 ONNX",
+    "protectLabel": "保护无声辅音和呼吸声 (Protect)",
+    "dangerZone": "危险区域",
+    "skipPassThroughConfirmation": "跳过音频直通确认弹窗",
+    "inUse": "使用中",
+    "required": "必选",
+    "installed": "已安装",
+    "delete": "删除",
+    "downloading": "下载中",
+    "download": "下载",
+    "embedders": "特征提取器 (Embedders)",
+    "pitchExtractionAlgorithms": "音高提取算法 (Pitch Extractors)",
+    "noEmbeddersAvailable": "无可用的特征提取器",
+    "noPitchAlgorithmsAvailable": "无可用的音高提取算法",
+    "enablingSilenceFront": "正在启用前导静音",
+    "disablingSilenceFront": "正在禁用前导静音",
+    "enablingForceFp32": "正在启用强制 FP32 模式",
+    "disablingForceFp32": "正在禁用强制 FP32 模式",
+    "enablingJit": "正在启用 JIT 编译",
+    "disablingJit": "正在禁用 JIT 编译",
+    "enablingOnnx": "正在启用转换为 ONNX",
+    "disablingOnnx": "正在禁用转换为 ONNX",
+    "downloadSuccess": "下载成功",
+    "deleteSuccess": "删除成功",
+    "embedderLabel": "特征提取器 (Embedder)",
+    "pitchExtractorLabel": "音高提取器",
+    "actionSuccess": "{{type}} \"{{name}}\" {{action}}成功！",
+    "actionFailed": "{{action}}{{type}}失败：{{error}}"
+  },
+  "effectsDefinition": {
+    "reverb": {
+      "name": "混响 (Reverb)",
+      "description": "为声音添加房间空间感、纵深感和环境氛围",
+      "parameters": {
+        "roomSize": {
+          "name": "空间大小 (Room Size)",
+          "description": "控制模拟的房间或空间体积大小"
+        },
+        "damping": {
+          "name": "高频阻尼 (Damping)",
+          "description": "空间内壁对高频声波的吸收衰减程度"
+        },
+        "wetDryMix": {
+          "name": "干湿混音比 (Wet/Dry Mix)",
+          "description": "原始声音信号与混响效果信号的比例"
+        },
+        "preDelay": {
+          "name": "预延迟 (Pre-delay)",
+          "description": "直达声与早期反射声之间的时间差，模拟房间深度"
+        }
+      }
+    },
+    "echo": {
+      "name": "回声 (Echo)",
+      "description": "产生具有明显间隔的延迟重复声音效果",
+      "parameters": {
+        "delayTime": {
+          "name": "延迟时间 (Delay Time)",
+          "description": "原始声音与第一次回声之间的时间间隔"
+        },
+        "feedback": {
+          "name": "反馈量 (Feedback)",
+          "description": "回声信号送回输入的比例，决定重复次数"
+        },
+        "wetLevel": {
+          "name": "湿信号电平 (Wet Level)",
+          "description": "回声效果器输出的音量大小"
+        },
+        "highCut": {
+          "name": "高频截止 (High Cut)",
+          "description": "滤除回声信号中的高频成分，使回声听起来更自然"
+        }
+      }
+    },
+    "chorus": {
+      "name": "合唱 (Chorus)",
+      "description": "通过微小的音高和时间调制，创造出多人同时发声的丰富和宽广效果",
+      "parameters": {
+        "rate": {
+          "name": "调制速率 (Rate)",
+          "description": "合唱效果中低频振荡器调制音高的速度"
+        },
+        "depth": {
+          "name": "调制深度 (Depth)",
+          "description": "音高偏移调制的幅度大小"
+        },
+        "mix": {
+          "name": "混合度 (Mix)",
+          "description": "未处理的干信号与合唱效果信号的比例"
+        },
+        "voiceCount": {
+          "name": "声部数 (Voice Count)",
+          "description": "参与合唱效果叠加的虚拟声部数量"
+        }
+      }
+    },
+    "distortion": {
+      "name": "失真 (Distortion)",
+      "description": "通过非线性放大为声音引入谐波饱和与粗糙感",
+      "parameters": {
+        "drive": {
+          "name": "驱动度 (Drive)",
+          "description": "送入放大器的信号强度，决定失真的剧烈程度"
+        },
+        "tone": {
+          "name": "音色 (Tone)",
+          "description": "失真效果的亮暗控制（高低频均衡）"
+        },
+        "level": {
+          "name": "输出电平 (Level)",
+          "description": "失真效果器处理后的最终输出音量"
+        },
+        "type": {
+          "name": "失真类型 (Type)",
+          "description": "失真所采用的模拟算法（软削波/硬削波/电子管/模糊）"
+        }
+      }
+    },
+    "compressor": {
+      "name": "压限器 (Compressor)",
+      "description": "控制音频信号的动态范围，使大音量减小，小音量放大，整体声音更平稳",
+      "parameters": {
+        "threshold": {
+          "name": "阈值 (Threshold)",
+          "description": "开始压缩的电平临界点，高于该值触发压缩"
+        },
+        "ratio": {
+          "name": "压缩比 (Ratio)",
+          "description": "信号超过阈值后的压缩倍率"
+        },
+        "attack": {
+          "name": "建立时间 (Attack)",
+          "description": "输入信号超阈值时，压限器启动并达到额定压缩的速度"
+        },
+        "release": {
+          "name": "释放时间 (Release)",
+          "description": "输入信号跌落至阈值下时，压限器停止压缩的恢复速度"
+        }
+      }
+    },
+    "equalizer": {
+      "name": "均衡器 (Equalizer)",
+      "description": "多频段均衡器，用于调节不同频率范围的音量",
+      "parameters": {
+        "low": {
+          "name": "低音 80Hz (Low)",
+          "description": "提升或衰减 80Hz 附近的低频成分"
+        },
+        "lowMid": {
+          "name": "中低音 320Hz (Low-Mid)",
+          "description": "提升或衰减 320Hz 附近的中低频（调节温暖度）"
+        },
+        "mid": {
+          "name": "中音 1.25kHz (Mid)",
+          "description": "提升或衰减 1.25kHz 附近的中频（调节人声存在感）"
+        },
+        "highMid": {
+          "name": "中高音 5kHz (High-Mid)",
+          "description": "提升或衰减 5kHz 附近的中高频（调节清晰度）"
+        },
+        "high": {
+          "name": "高音 12.5kHz (High)",
+          "description": "提升或衰减 12.5kHz 附近的高频成分（调节空气感与明亮度）"
+        }
+      }
+    },
+    "noiseGate": {
+      "name": "噪声门 (Noise Gate)",
+      "description": "阻断低于设定阈值的微弱信号，主要用于消除说话停顿期间的 background noise",
+      "parameters": {
+        "threshold": {
+          "name": "阈值 (Threshold)",
+          "description": "低于此电平的信号将被静音关闭，高于此电平则门开启"
+        },
+        "ratio": {
+          "name": "衰减比 (Ratio)",
+          "description": "门关闭时对背景噪声的衰减力度"
+        },
+        "attack": {
+          "name": "开启时间 (Attack)",
+          "description": "检测到声音后，门从完全关闭到完全开启的速度"
+        },
+        "release": {
+          "name": "关闭时间 (Release)",
+          "description": "声音消失后，门从完全开启到平滑关闭的速度"
+        }
+      }
+    },
+    "gain": {
+      "name": "增益 (Gain)",
+      "description": "调节音频信号的整体音量强度",
+      "parameters": {
+        "gain": {
+          "name": "增益值 (Gain)",
+          "description": "整体音量放大或衰减的dB分贝数"
+        }
+      }
+    },
+    "lowpass": {
+      "name": "低通滤波器 (Low Pass Filter)",
+      "description": "滤除高于截止频率的高频声音，只保留低频成分",
+      "parameters": {
+        "cutoff": {
+          "name": "截止频率 (Cutoff Frequency)",
+          "description": "滤波器发挥作用的临界频率点，高于此频率被滤除"
+        },
+        "resonance": {
+          "name": "共振/共鸣度 (Resonance)",
+          "description": "在截止频率处的电平尖峰强调程度，可产生哨鸣感"
+        }
+      }
+    },
+    "highpass": {
+      "name": "高通滤波器 (High Pass Filter)",
+      "description": "滤除低于截止频率的低频声音，常用于滤除环境低频杂音或喷麦声",
+      "parameters": {
+        "cutoff": {
+          "name": "截止频率 (Cutoff Frequency)",
+          "description": "滤波器发挥作用的临界频率点，低于此频率被滤除"
+        },
+        "resonance": {
+          "name": "共振/共鸣度 (Resonance)",
+          "description": "在截止频率处的电平尖峰强调程度，可产生哨鸣感"
+        }
+      }
+    },
+    "bitcrush": {
+      "name": "比特粉碎器 (Bitcrush)",
+      "description": "模拟低分辨率数字系统的采样失真，产生复古电子游戏机般的 8-bit Lo-Fi 粗糙质感",
+      "parameters": {
+        "bitDepth": {
+          "name": "采样比特深度 (Bit Depth)",
+          "description": "用于量化音频的位数，位数越低声音越数字化/粗糙"
+        }
+      }
+    },
+    "clipping": {
+      "name": "削波器 (Clipping)",
+      "description": "将音频波形中超过阈值的部分直接截断，产生硬朗的数字削波失真",
+      "parameters": {
+        "threshold": {
+          "name": "削波阈值 (Threshold)",
+          "description": "音频信号被硬截断的电平上限"
+        }
+      }
+    },
+    "limiter": {
+      "name": "限制器 (Limiter)",
+      "description": "极高压缩比的压限器，用于绝对防止音频信号超过设定的最大上限以避免爆音",
+      "parameters": {
+        "threshold": {
+          "name": "最大输出阈值 (Threshold)",
+          "description": "绝对不允许音频信号超过的最大限制电平"
+        },
+        "release": {
+          "name": "释放时间 (Release)",
+          "description": "限制状态解除后，音量恢复到正常水平所需的时间"
+        }
+      }
+    },
+    "invert": {
+      "name": "相位反转 (Invert)",
+      "description": "将音频信号的波形极性翻转180度，用于修正多麦克风录音的相位抵消问题",
+      "parameters": {}
+    },
+    "ladderFilter": {
+      "name": "梯级滤波器 (Ladder Filter)",
+      "description": "Moog合成器风格滤波器，具有温暖、肥厚的滤波音色特性",
+      "parameters": {
+        "cutoff": {
+          "name": "截止频率 (Cutoff Frequency)",
+          "description": "滤波器截止频率切点"
+        },
+        "resonance": {
+          "name": "共振度 (Resonance)",
+          "description": "截止频率处的共振反馈强调量"
+        },
+        "drive": {
+          "name": "驱动度 (Drive)",
+          "description": "滤波器内部的过载量，用于引入模拟饱和染色"
+        },
+        "mode": {
+          "name": "滤波模式 (Mode)",
+          "description": "滤波器的工作模式 (LPF=低通, HPF=高通, BPF=带通, 12/24=滚降斜率)"
+        }
+      }
+    },
+    "peakFilter": {
+      "name": "峰值滤波器 (Peak Filter)",
+      "description": "单频段参量均衡器，可以在指定的中心频率处进行精确的提升或衰减",
+      "parameters": {
+        "cutoff": {
+          "name": "中心频率 (Frequency)",
+          "description": "滤波处理的核心频点"
+        },
+        "gain": {
+          "name": "增益 (Gain)",
+          "description": "在中心频率处进行提升或衰减的dB值"
+        },
+        "q": {
+          "name": "品质因数 Q (Q Factor)",
+          "description": "受影响的带宽范围大小，Q值越高频带越窄越精确"
+        }
+      }
+    },
+    "highShelfFilter": {
+      "name": "高架滤波器 (High Shelf Filter)",
+      "description": "对高于指定截止频率的所有高频段进行整体的提升或衰减",
+      "parameters": {
+        "cutoff": {
+          "name": "起始频率 (Cutoff Frequency)",
+          "description": "高架滤波搁架开始过渡的起点频率"
+        },
+        "gain": {
+          "name": "增益 (Gain)",
+          "description": "高架频段整体放大或缩小的dB值"
+        },
+        "q": {
+          "name": "过渡陡度 (Q Factor)",
+          "description": "高架过渡区域的陡峭/平缓程度"
+        }
+      }
+    },
+    "lowShelfFilter": {
+      "name": "低架滤波器 (Low Shelf Filter)",
+      "description": "对低于指定截止频率的所有低频段进行整体的提升或衰减",
+      "parameters": {
+        "cutoff": {
+          "name": "起始频率 (Cutoff Frequency)",
+          "description": "低架滤波搁架开始过渡的起点频率"
+        },
+        "gain": {
+          "name": "增益 (Gain)",
+          "description": "低架频段整体放大或缩小的dB值"
+        },
+        "q": {
+          "name": "过渡陡度 (Q Factor)",
+          "description": "低架过渡区域的陡峭/平缓程度"
+        }
+      }
+    },
+    "convolution": {
+      "name": "卷积混响 (Convolution)",
+      "description": "利用真实声学空间的脉冲响应(IR)文件，高度逼真地重现特定场所的环境混响",
+      "parameters": {
+        "impulseResponse": {
+          "name": "脉冲响应空间 (Impulse Response)",
+          "description": "加载的声学空间类型（大厅、房间、板式、弹簧、大教堂等）"
+        },
+        "mix": {
+          "name": "干湿混合度 (Mix)",
+          "description": "未处理的原声信号与经过卷积混响处理信号的比例"
+        }
+      }
+    },
+    "mp3Compressor": {
+      "name": "MP3 压缩模拟 (MP3 Compressor)",
+      "description": "人为为声音引入低比特率 MP3 编码时特有的音质破坏及数字缺陷残留",
+      "parameters": {
+        "vbrQuality": {
+          "name": "编码音质 (VBR Quality)",
+          "description": "MP3 VBR 压缩品质参数，0为最高质量，9为最低质量"
+        }
+      }
+    },
+    "gsmCompressor": {
+      "name": "GSM 电话压缩模拟 (GSM Compressor)",
+      "description": "模拟早期第二代移动电话网络(2G)通信中的强力音频压缩与带通削波效果",
+      "parameters": {}
+    },
+    "delay": {
+      "name": "简单延迟 (Simple Delay)",
+      "description": "基础音频延迟效果器",
+      "parameters": {
+        "delayTime": {
+          "name": "延迟时间 (Delay Time)",
+          "description": "回声产生的时间延迟间隔"
+        },
+        "feedback": {
+          "name": "反馈量 (Feedback)",
+          "description": "送回延迟线进行重复回声的信号比例"
+        },
+        "wetLevel": {
+          "name": "湿信号电平 (Wet Level)",
+          "description": "延迟效果信号的音量大小"
+        }
+      }
+    }
+  }
+}

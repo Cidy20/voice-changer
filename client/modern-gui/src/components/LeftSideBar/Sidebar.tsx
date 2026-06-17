@@ -2,6 +2,7 @@ import { JSX, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { RVCModelSlot } from '@dannadori/voice-changer-client-js';
+import { useTranslation } from 'react-i18next';
 import { useAppState } from '../../context/AppContext';
 import { useUIContext } from '../../context/UIContext';
 import ModelList from './ModelList';
@@ -17,6 +18,7 @@ function LeftSidebar({
   isSidebarOpen,
   toggleSidebar,
 }: LeftSidebarProps): JSX.Element | null {
+  const { t } = useTranslation();
   // ---------------- State ----------------
   const appState = useAppState();
   const guiState = useUIContext();
@@ -25,7 +27,7 @@ function LeftSidebar({
   const [filteredAndSortedModels, setFilteredAndSortedModels] = useState<RVCModelSlot[]>([]);
 
   // Currently active model slot index from server state
-  const confirmedSelectedSlotIndex = appState.serverSetting?.serverSetting?.modelSlotIndex ?? null;
+  const confirmedSelectedSlotIndex = (appState.serverSetting?.serverSetting?.modelSlotIndex ?? null) as number | null;
 
   // Sidebar Class
   let finalSidebarClasses = `bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 border-r border-slate-200 dark:border-gray-700 p-4 space-y-4 transition-all duration-300 ease-in-out flex flex-col z-20 `;
@@ -75,7 +77,7 @@ function LeftSidebar({
 
       {isSidebarOpen && <hr className="hidden md:block border-slate-300 dark:border-gray-600 my-3" />}
 
-      <h3 className={`text-xl font-semibold text-slate-800 dark:text-gray-100 ${isSidebarOpen ? 'mt-2 md:mt-0 text-center md:text-left' : 'mt-0 hidden'}`}>Model Selector</h3>
+      <h3 className={`text-xl font-semibold text-slate-800 dark:text-gray-100 ${isSidebarOpen ? 'mt-2 md:mt-0 text-center md:text-left' : 'mt-0 hidden'}`}>{t('sidebar.modelSelector')}</h3>
 
       {/* Main content area - Only rendered when sidebar is open to prevent layout issues */}
       {isSidebarOpen && (
@@ -89,11 +91,11 @@ function LeftSidebar({
 
           {/* Model count display and upload button */}
           <div className="flex justify-between items-center mb-2">
-            <span className={`text-sm font-medium text-slate-600 dark:text-gray-400`}>Available Models ({filteredAndSortedModels.length})</span>
+            <span className={`text-sm font-medium text-slate-600 dark:text-gray-400`}>{t('sidebar.availableModels')} ({filteredAndSortedModels.length})</span>
             <button
               onClick={() => setShowUpload(true)}
               className="p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-              title="Upload New Model"
+              title={t('sidebar.uploadNewModel')}
             >
               <FontAwesomeIcon icon={faPlus} size="lg" />
             </button>

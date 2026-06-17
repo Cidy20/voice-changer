@@ -4,6 +4,7 @@ import GenericModal from '../../../Modals/GenericModal';
 import { CSS_CLASSES } from '../../../../styles/constants';
 import SettingsView from './SettingsView';
 import DownloaderView from './DownloaderView';
+import { useTranslation } from 'react-i18next';
 
 interface AdvancedSettingsModalProps {
   showAdvancedSettings: boolean;
@@ -16,6 +17,7 @@ const TAB_IDS = {
 }
 
 function AdvancedSettingsModal({ showAdvancedSettings, setShowAdvancedSettings }: AdvancedSettingsModalProps): JSX.Element {
+  const { t } = useTranslation();
   const appState = useAppState();
   const [activeTab, setActiveTab] = useState(TAB_IDS.settings);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -34,9 +36,9 @@ function AdvancedSettingsModal({ showAdvancedSettings, setShowAdvancedSettings }
     <GenericModal
       isOpen={showAdvancedSettings}
       onClose={handleClose}
-      title="Advanced Settings"
+      title={t('bottomBar.advancedSettings')}
       secondaryButton={{
-        text: 'Close',
+        text: t('advancedSettings.close'),
         onClick: handleClose,
         className: CSS_CLASSES.modalSecondaryButton,
         disabled: appState.serverSetting.isUploading || isDownloading
@@ -52,7 +54,7 @@ function AdvancedSettingsModal({ showAdvancedSettings, setShowAdvancedSettings }
             }`}
             onClick={() => setActiveTab(TAB_IDS.settings)}
           >
-            Settings
+            {t('advancedSettings.tabSettings')}
           </button>
           <button
             className={`px-4 py-2 text-sm font-medium transition-colors duration-200 ${
@@ -62,7 +64,7 @@ function AdvancedSettingsModal({ showAdvancedSettings, setShowAdvancedSettings }
             }`}
             onClick={() => setActiveTab(TAB_IDS.downloader)}
           >
-            Downloader
+            {t('advancedSettings.tabDownloader')}
           </button>
         </div>
         <div className="flex-1 min-h-0 overflow-y-auto py-2">

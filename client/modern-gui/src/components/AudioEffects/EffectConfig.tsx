@@ -1,10 +1,29 @@
 import { JSX, useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestionCircle } from '@fortawesome/free-solid-svg-icons';
-import { AudioEffect, AudioEffectParameterDefinition } from '@dannadori/voice-changer-client-js';
+import { useTranslation } from 'react-i18next';
 import { CSS_CLASSES } from '../../styles/constants';
 import DebouncedSlider from '../Helpers/DebouncedSlider';
 import { getEffectDefinition } from './serverEffectsUtils';
+
+export interface AudioEffect {
+  type: string;
+  channel: 'input' | 'output';
+  enabled: boolean;
+  parameters: Record<string, number | boolean | string>;
+}
+
+export interface AudioEffectParameterDefinition {
+  name: string;
+  type: 'slider' | 'toggle' | 'select';
+  defaultValue: number | boolean | string;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  description?: string;
+  options?: string[];
+}
 
 // UI type with index for client-side management
 type AudioEffectWithIndex = AudioEffect & { index: number };
@@ -16,13 +35,15 @@ interface EffectConfigProps {
 }
 
 interface SliderParameterProps {
+  effectType: string;
   paramKey: string;
   definition: AudioEffectParameterDefinition;
   value: number;
   onChange: (value: number) => void;
 }
 
-function SliderParameter({ paramKey, definition, value, onChange }: SliderParameterProps) {
+function SliderParameter({ effectType, paramKey, definition, value, onChange }: SliderParameterProps) {
+  const { t } = useTranslation();
   const [displayValue, setDisplayValue] = useState(value);
   
   // Update display value when parameter value changes from server
@@ -30,20 +51,17 @@ function SliderParameter({ paramKey, definition, value, onChange }: SliderParame
     setDisplayValue(value);
   }, [value]);
 
+  const translatedName = t(`effectsDefinition.${effectType}.parameters.${paramKey}.name`, { defaultValue: definition.name });
+  const translatedDesc = t(`effectsDefinition.${effectType}.parameters.${paramKey}.description`, { defaultValue: definition.description });
+  const labelText = translatedDesc ? `${translatedName} (${translatedDesc})` : translatedName;
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-1">
           <label className={CSS_CLASSES.label}>
-            {definition.name}
+            {labelText}
           </label>
-          {definition.description && (
-            <FontAwesomeIcon 
-              icon={faQuestionCircle} 
-              className="h-3 w-3 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 cursor-help" 
-              title={definition.description}
-            />
-          )}
         </div>
         <span className={CSS_CLASSES.sliderValue}>
           {displayValue.toFixed(definition.step && definition.step < 1 ? 2 : 0)}
@@ -64,14 +82,16 @@ function SliderParameter({ paramKey, definition, value, onChange }: SliderParame
 }
 
 function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigProps): JSX.Element {
+  const { t } = useTranslation();
+
   if (!effect) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600">
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">Configuration</h5>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">{t('audioEffects.configuration')}</h5>
         </div>
         <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-gray-400 text-sm">
-          Select an effect to configure its parameters
+          {t('audioEffects.selectEffectToConfigure')}
         </div>
       </div>
     );
@@ -82,10 +102,10 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600">
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">Unknown Effect</h5>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">{t('audioEffects.unknownEffect')}</h5>
         </div>
         <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-gray-400 text-sm">
-          Effect definition not found for type: {effect.type}
+          {t('audioEffects.effectDefinitionNotFound', { type: effect.type })}
         </div>
       </div>
     );
@@ -103,6 +123,7 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
         return (
           <SliderParameter
             key={paramKey}
+            effectType={effect.type}
             paramKey={paramKey}
             definition={definition}
             value={value as number}
@@ -110,21 +131,17 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
           />
         );
 
-      case 'toggle':
+      case 'toggle': {
         const boolValue = value as boolean;
+        const translatedName = t(`effectsDefinition.${effect.type}.parameters.${paramKey}.name`, { defaultValue: definition.name });
+        const translatedDesc = t(`effectsDefinition.${effect.type}.parameters.${paramKey}.description`, { defaultValue: definition.description });
+        const labelText = translatedDesc ? `${translatedName} (${translatedDesc})` : translatedName;
         return (
           <div key={paramKey} className="flex items-center justify-between">
             <div className="flex items-center space-x-1">
               <label className={CSS_CLASSES.label}>
-                {definition.name}
+                {labelText}
               </label>
-              {definition.description && (
-                <FontAwesomeIcon 
-                  icon={faQuestionCircle} 
-                  className="h-3 w-3 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 cursor-help" 
-                  title={definition.description}
-                />
-              )}
             </div>
             <button
               onClick={() => handleChange(paramKey, !boolValue)}
@@ -142,29 +159,26 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
             </button>
           </div>
         );
+      }
 
-      case 'select':
+      case 'select': {
         const stringValue = value as string;
+        const translatedName = t(`effectsDefinition.${effect.type}.parameters.${paramKey}.name`, { defaultValue: definition.name });
+        const translatedDesc = t(`effectsDefinition.${effect.type}.parameters.${paramKey}.description`, { defaultValue: definition.description });
+        const labelText = translatedDesc ? `${translatedName} (${translatedDesc})` : translatedName;
         return (
           <div key={paramKey} className="space-y-2">
             <div className="flex items-center space-x-1">
               <label className={CSS_CLASSES.label}>
-                {definition.name}
+                {labelText}
               </label>
-              {definition.description && (
-                <FontAwesomeIcon 
-                  icon={faQuestionCircle} 
-                  className="h-3 w-3 text-slate-400 dark:text-gray-500 hover:text-slate-600 dark:hover:text-gray-300 cursor-help" 
-                  title={definition.description}
-                />
-              )}
             </div>
             <select
               value={stringValue}
               onChange={(e) => handleChange(paramKey, e.target.value)}
               className={CSS_CLASSES.select}
             >
-              {definition.options?.map((option) => (
+              {definition.options?.map((option: string) => (
                 <option key={option} value={option}>
                   {option}
                 </option>
@@ -172,6 +186,7 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
             </select>
           </div>
         );
+      }
 
       default:
         return null;
@@ -183,15 +198,17 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
       {/* Header */}
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600">
         <div>
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">{effectDefinition.name}</h5>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">
+            {t(`effectsDefinition.${effect.type}.name`, { defaultValue: effectDefinition.name })}
+          </h5>
           <div className="flex items-center space-x-2 mt-1">
-            <p className="text-xs text-slate-500 dark:text-gray-400 capitalize">{effect.type} Effect</p>
+            <p className="text-xs text-slate-500 dark:text-gray-400 capitalize">{t('audioEffects.effectTypeSuffix', { type: effect.type })}</p>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
               effect.channel === 'input'
                 ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
             }`}>
-              {effect.channel} channel
+              {t(`audioEffects.${effect.channel}`)} {t('audioEffects.channelLabelSuffix')}
             </span>
           </div>
         </div>
@@ -200,14 +217,14 @@ function EffectConfig({ effect, onParameterChange, serverSchema }: EffectConfigP
             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
             : 'bg-slate-100 text-slate-600 dark:bg-gray-700 dark:text-gray-400'
         }`}>
-          {effect.enabled ? 'Enabled' : 'Disabled'}
+          {effect.enabled ? t('audioEffects.enabled') : t('audioEffects.disabled')}
         </div>
       </div>
 
       {/* Parameters */}
       <div className="flex-1 overflow-y-auto space-y-4">
         {Object.entries(effectDefinition.parameters).map(([paramKey, definition]) => 
-          renderParameter(paramKey, definition)
+          renderParameter(paramKey, definition as AudioEffectParameterDefinition)
         )}
       </div>
     </div>

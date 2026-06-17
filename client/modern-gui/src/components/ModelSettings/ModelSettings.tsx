@@ -1,17 +1,23 @@
 import { RVCModelSlot } from "@dannadori/voice-changer-client-js";
 import { CSS_CLASSES } from "../../styles/constants"
 import DebouncedSlider from "../Helpers/DebouncedSlider"
+import { useTranslation } from "react-i18next";
+
+interface ExtendedRVCModelSlot extends RVCModelSlot {
+  defaultFormantShift?: number;
+}
 
 interface ModelSettingsProps {
-  model: RVCModelSlot;
+  model: ExtendedRVCModelSlot;
   handlePitchChange: (val: number) => void;
   handleFormatShiftChange: (val: number) => void;
   handleIndexRatioChange: (val: number) => void;
   handleSpeakerChange: (val: number) => void;
-  setModel: (model: RVCModelSlot) => void;
+  setModel: (model: ExtendedRVCModelSlot) => void;
 }
 
 function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, handleIndexRatioChange, handleSpeakerChange, setModel }: ModelSettingsProps) {
+  const { t } = useTranslation();
   // ---------------- State ----------------
   let speakerOptions: JSX.Element[] = [];
   if (model && model.speakers && Object.keys(model.speakers).length > 0) {
@@ -19,7 +25,7 @@ function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, hand
       <option key={id} value={id}>{name as string}</option>
     ));
   } else {
-    speakerOptions = [<option key="no-speakers" value={0} disabled>No speakers</option>];
+    speakerOptions = [<option key="no-speakers" value={0} disabled>{t('modelSettings.noSpeakers')}</option>];
   }
 
   // ---------------- Render ----------------
@@ -27,7 +33,7 @@ function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, hand
   return (
     <div className={`space-y-4 ${!model ? 'opacity-50 pointer-events-none' : ''}`}>
       <div>
-        <label htmlFor="pitch" className={CSS_CLASSES.label}>Pitch:</label>
+        <label htmlFor="pitch" className={CSS_CLASSES.label}>{t('modelSettings.pitch')}</label>
         <DebouncedSlider
           id="pitch"
           name="pitch"
@@ -43,7 +49,7 @@ function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, hand
         <p className={CSS_CLASSES.sliderValue}>{model?.defaultTune || 0}</p>
       </div>
       <div>
-        <label htmlFor="formatShift" className={CSS_CLASSES.label}>Formant Shift:</label>
+        <label htmlFor="formatShift" className={CSS_CLASSES.label}>{t('modelSettings.formantShift')}</label>
         <DebouncedSlider
           id="formatShift"
           name="formatShift"
@@ -60,7 +66,7 @@ function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, hand
       </div>
       {model.indexFile !== "" && (
         <div>
-          <label htmlFor="indexRatio" className={CSS_CLASSES.label}>Index Ratio:</label>
+          <label htmlFor="indexRatio" className={CSS_CLASSES.label}>{t('modelSettings.indexRatio')}</label>
           <DebouncedSlider
             id="indexRatio"
             name="indexRatio"
@@ -80,7 +86,7 @@ function ModelSettings({ model, handlePitchChange, handleFormatShiftChange, hand
         // Only show speaker selection if there is more than one speaker
         model.speakers && Object.keys(model.speakers).length > 1 && (
           <div className="flex items-center space-x-2">
-            <label htmlFor="speaker" className={CSS_CLASSES.label}>Speaker:</label>
+            <label htmlFor="speaker" className={CSS_CLASSES.label}>{t('modelSettings.speaker')}</label>
             <select
               id="speaker"
               name="speaker"

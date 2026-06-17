@@ -1,4 +1,5 @@
 import { CalculatedMetricValues, PerfStatus } from "./PerformanceStatsCard";
+import { useTranslation } from "react-i18next";
 
 interface PerformanceStatsProps {
     calculatedMetrics: CalculatedMetricValues;
@@ -12,6 +13,7 @@ const PERF_TEXT_CLASSES: Record<PerfStatus, string> = {
 };
 
 function PerformanceStats({ calculatedMetrics }: PerformanceStatsProps) {
+    const { t } = useTranslation();
     // ---------------- States ----------------
     const performanceMetricKeys: string[] = ["Vol", "Ping", "Total", "Perf"];
 
@@ -33,7 +35,7 @@ function PerformanceStats({ calculatedMetrics }: PerformanceStatsProps) {
                 const metricInfo = displayValues[metricKey];
                 return (
                     <span key={metricKey} className="text-xs font-medium text-slate-600 dark:text-gray-400">
-                        {metricKey}:{' '}
+                        {t(`performance.${metricKey.toLowerCase()}`)}:{' '}
                         <span className={`text-slate-800 dark:text-gray-200 ${metricInfo.className || ''}`}>
                             {metricInfo.value}
                             {metricInfo.unit || ''}

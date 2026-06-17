@@ -14,6 +14,7 @@ import torch.nn.functional as F
 import onnxruntime
 from torchaudio import transforms as tat
 from voice_changer.common.deviceManager.DeviceManager import DeviceManager
+from voice_changer.common.OnnxLoader import safe_creation
 import logging
 
 from const import HUBERT_SAMPLE_RATE, WINDOW_SIZE
@@ -112,7 +113,7 @@ class Pipeline:
             providers,
             provider_options,
         ) = self.device_manager.get_onnx_execution_provider()
-        return onnxruntime.InferenceSession(onnx_model.SerializeToString(), providers=providers, provider_options=provider_options)
+        return safe_creation(onnx_model.SerializeToString(), providers=providers, provider_options=provider_options)
 
     def getPipelineInfo(self):
         inferencerInfo = self.inferencer.getInferencerInfo() if self.inferencer else {}

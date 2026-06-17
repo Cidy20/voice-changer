@@ -2,7 +2,21 @@ import { JSX, useEffect, useState } from 'react';
 import { CSS_CLASSES } from '../../styles/constants';
 import DebouncedSlider from '../Helpers/DebouncedSlider';
 import AudioPlayer from '../Helpers/AudioPlayer';
-import { BackgroundTrack } from '@dannadori/voice-changer-client-js';
+import { useTranslation } from 'react-i18next';
+
+export interface BackgroundTrack {
+  id: string;
+  name: string;
+  filename: string;
+  enabled: boolean;
+  gainDb: number;
+  mode: 'loop' | 'random';
+  loopPauseSec?: number;
+  random?: {
+    minPauseSec: number;
+    maxPauseSec: number;
+  };
+}
 
 type BackgroundConfigProps = {
   track: BackgroundTrack | null;
@@ -10,6 +24,7 @@ type BackgroundConfigProps = {
 };
 
 function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Element {
+  const { t } = useTranslation();
   const [local, setLocal] = useState<BackgroundTrack | null>(track);
   const [displayGain, setDisplayGain] = useState<number>(track?.gainDb ?? -6);
 
@@ -22,17 +37,17 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
     if (!local) return;
     const updated = { ...local, [key]: value } as BackgroundTrack;
     setLocal(updated);
-    onChange(local.id, key, value);
+    onChange(local.id, String(key), value);
   };
 
   if (!local) {
     return (
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600">
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">Background Config</h5>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">{t('audioEffects.backgroundConfig')}</h5>
         </div>
         <div className="flex-1 flex items-center justify-center text-slate-500 dark:text-gray-400 text-sm">
-          Select a background track
+          {t('audioEffects.selectBackgroundTrack')}
         </div>
       </div>
     );
@@ -53,7 +68,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
             : 'bg-slate-100 text-slate-600 dark:bg-gray-700 dark:text-gray-400'
         }`}>
-          {local.enabled ? 'Enabled' : 'Disabled'}
+          {local.enabled ? t('audioEffects.enabled') : t('audioEffects.disabled')}
         </div>
       </div>
 
@@ -61,7 +76,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
       <div className="flex-1 overflow-y-auto space-y-4">
         {/* Name */}
         <div>
-          <label className={CSS_CLASSES.label}>Name</label>
+          <label className={CSS_CLASSES.label}>{t('audioEffects.trackNameLabel')}</label>
           <input
             type="text"
             value={local.name}
@@ -73,7 +88,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
         {/* Gain */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className={CSS_CLASSES.label}>Gain</label>
+            <label className={CSS_CLASSES.label}>{t('audioEffects.gainLabel')}</label>
             <span className={CSS_CLASSES.sliderValue}>{displayGain.toFixed(1)} dB</span>
           </div>
           <DebouncedSlider
@@ -89,21 +104,21 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
 
         {/* Mode */}
         <div>
-          <label className={CSS_CLASSES.label}>Mode</label>
+          <label className={CSS_CLASSES.label}>{t('audioEffects.modeLabel')}</label>
           <select
             value={local.mode}
             onChange={(e) => handle('mode', e.target.value as 'loop' | 'random')}
             className={CSS_CLASSES.select}
           >
-            <option value="loop">Loop</option>
-            <option value="random">Random</option>
+            <option value="loop">{t('audioEffects.loopMode')}</option>
+            <option value="random">{t('audioEffects.randomMode')}</option>
           </select>
         </div>
 
         {/* Loop pause (seconds) when in Loop mode */}
         {local.mode === 'loop' && (
           <div>
-            <label className={CSS_CLASSES.label}>Loop Pause (s)</label>
+            <label className={CSS_CLASSES.label}>{t('audioEffects.loopPauseLabel')}</label>
             <input
               type="number"
               className={CSS_CLASSES.input}
@@ -117,7 +132,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
         {local.mode === 'random' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className={CSS_CLASSES.label}>Min Pause (s)</label>
+              <label className={CSS_CLASSES.label}>{t('audioEffects.minPauseLabel')}</label>
             <input
               type="number"
               className={CSS_CLASSES.input}
@@ -133,7 +148,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
             />
             </div>
             <div>
-              <label className={CSS_CLASSES.label}>Max Pause (s)</label>
+              <label className={CSS_CLASSES.label}>{t('audioEffects.maxPauseLabel')}</label>
             <input
               type="number"
               className={CSS_CLASSES.input}
@@ -154,7 +169,7 @@ function BackgroundConfig({ track, onChange }: BackgroundConfigProps): JSX.Eleme
         {/* Preview & Info (bottom) */}
         {local.filename && (
           <div>
-            <label className={CSS_CLASSES.label}>Preview</label>
+            <label className={CSS_CLASSES.label}>{t('audioEffects.previewLabel')}</label>
             <AudioPlayer src={`/sound_dir/${local.id}/${local.filename}`} />
           </div>
         )}

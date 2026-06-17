@@ -107,3 +107,73 @@ def convert_fp16(model: ModelProto) -> ModelProto:
     fusion_utils.remove_useless_cast_nodes()
     wrapped_fp16_model.topological_sort()
     return wrapped_fp16_model.model
+
+
+def safe_creation(model_or_path, sess_options=None, providers=None, provider_options=None):
+    """
+    安全创建 onnxruntime.InferenceSession，捕获 CoreML 等 ExecutionProvider 初始化引发的底层 MIL 编译失败（如-14错误），
+    并自动降级回退到 CPUExecutionProvider，确保服务不闪退/不卡死。
+    """
+    import onnxruntime
+    
+    providers_list = list(providers) if providers is not None else None
+    provider_options_list = list(provider_options) if provider_options is not None else None
+    
+    try:
+        if providers_list is not None:
+            return onnxruntime.InferenceSession(
+                model_or_path,
+                sess_options=sess_options,
+                providers=providers_list,
+                provider_options=provider_options_list
+            )
+        else:
+            return onnxruntime.InferenceSession(model_or_path, sess_options=sess_options)
+    except Exception as e:
+        logger.warning(f"[safe_creation] 无法使用指定的 providers {providers_list} 创建会话。错误: {e}")
+        
+        # 如果请求了 CoreMLExecutionProvider，则剔除它重试
+        if providers_list and "CoreMLExecutionProvider" in providers_list:
+            logger.info("[safe_creation] 检测到 CoreMLExecutionProvider 初始化失败，正在尝试将其移除并重新加载...")
+            new_providers = []
+            new_options = []
+            for i, p in enumerate(providers_list):
+                if p != "CoreMLExecutionProvider":
+                    new_providers.append(p)
+                    if provider_options_list and i < len(provider_options_list):
+                        new_options.append(provider_options_list[i])
+            
+            if "CPUExecutionProvider" not in new_providers:
+                new_providers.append("CPUExecutionProvider")
+                if provider_options_list:
+                    new_options.append({})
+            
+            try:
+                if provider_options_list:
+                    return onnxruntime.InferenceSession(
+                        model_or_path,
+                        sess_options=sess_options,
+                        providers=new_providers,
+                        provider_options=new_options
+                    )
+                else:
+                    return onnxruntime.InferenceSession(
+                        model_or_path,
+                        sess_options=sess_options,
+                        providers=new_providers
+                    )
+            except Exception as e_retry:
+                logger.warning(f"[safe_creation] 剔除 CoreML 后的重试再次失败: {e_retry}。将使用纯 CPU 模式加载。")
+        
+        # 终极保底机制：仅使用纯 CPUExecutionProvider 加载会话，确保服务不会崩溃
+        try:
+            logger.info("[safe_creation] 正在使用纯 CPUExecutionProvider 进行终极回退加载...")
+            return onnxruntime.InferenceSession(
+                model_or_path,
+                sess_options=sess_options,
+                providers=["CPUExecutionProvider"]
+            )
+        except Exception as e_final:
+            logger.error(f"[safe_creation] 终极 CPU 回退加载失败: {e_final}")
+            raise e_final
+

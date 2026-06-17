@@ -2,6 +2,7 @@
 import { CSS_CLASSES } from "../../styles/constants";
 import { ClientState } from "@dannadori/voice-changer-client-js";
 import { UIContextType } from "../../context/UIContext";
+import { useTranslation } from "react-i18next";
 
 interface GpuInfo {
     id: number;
@@ -16,6 +17,7 @@ interface GPUConfigProps {
 }
 
 function GPUConfig({ appState, uiState }: GPUConfigProps) {
+    const { t } = useTranslation();
     // ---------------- Handlers ----------------
 
     // Handle GPU Change
@@ -32,7 +34,7 @@ function GPUConfig({ appState, uiState }: GPUConfigProps) {
 
     return (
         <div>
-            <label htmlFor="gpu" className={CSS_CLASSES.label}>Processing Unit (GPU):</label>
+            <label htmlFor="gpu" className={CSS_CLASSES.label}>{t('aiSettings.gpuConfig')}:</label>
             <select
                 id="gpu"
                 name="gpu"
@@ -46,7 +48,7 @@ function GPUConfig({ appState, uiState }: GPUConfigProps) {
                             {`${gpu.name} ${gpu.memory ? `(${(gpu.memory / 1024 / 1024 / 1024).toFixed(0)} GB)` : ""}`}
                         </option>)
                 ) : (
-                    <option value="-1" disabled>No GPUs available</option>
+                    <option value="-1" disabled>{t('aiSettings.noGpus')}</option>
                 )}
             </select>
         </div>

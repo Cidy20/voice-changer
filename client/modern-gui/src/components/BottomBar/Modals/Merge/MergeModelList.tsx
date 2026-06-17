@@ -1,31 +1,38 @@
 import { JSX } from 'react';
 import { RVCModelSlot } from '@dannadori/voice-changer-client-js';
 import { CSS_CLASSES } from '../../../../styles/constants';
+import { useTranslation } from 'react-i18next';
+
+interface ExtendedRVCModelSlot extends RVCModelSlot {
+  embedder?: string;
+  version?: string;
+}
 
 interface ModelMergeInfo {
-  slot: RVCModelSlot;
+  slot: ExtendedRVCModelSlot;
   percentage: number;
 }
 
 interface MergeModelListProps {
-  models: RVCModelSlot[];
+  models: ExtendedRVCModelSlot[];
   selectedModels: ModelMergeInfo[];
-  onModelToggle: (slot: RVCModelSlot) => void;
+  onModelToggle: (slot: ExtendedRVCModelSlot) => void;
   onPercentageChange: (slotIndex: number, percentage: number) => void;
   modelDir: string;
 }
 
 function MergeModelList({ models, selectedModels, onModelToggle, onPercentageChange, modelDir }: MergeModelListProps): JSX.Element {
+  const { t } = useTranslation();
 
   // ---------------- Functions ----------------
 
   // Check if a model is selected
-  const isModelSelected = (slot: RVCModelSlot) => {
+  const isModelSelected = (slot: ExtendedRVCModelSlot) => {
     return selectedModels.some(m => m.slot.slotIndex === slot.slotIndex);
   };
 
   // Get model percentage
-  const getModelPercentage = (slot: RVCModelSlot) => {
+  const getModelPercentage = (slot: ExtendedRVCModelSlot) => {
     const found = selectedModels.find(m => m.slot.slotIndex === slot.slotIndex);
     return found ? found.percentage : 50;
   };
@@ -61,11 +68,11 @@ function MergeModelList({ models, selectedModels, onModelToggle, onPercentageCha
   
   return (
     <div className="space-y-3">
-      <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">Available Models</h4>
+      <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">{t('sidebar.availableModels')}</h4>
 
       {models.length === 0 ? (
-        <div className="text-center py-8 text-slate-500 dark:text-gray-400">
-          <p>No models match the current filter criteria.</p>
+        <div className="text-center py-8 text-slate-500 dark:text-gray-400 text-sm">
+          <p>{t('mergeLab.noModelsMatch')}</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -102,7 +109,7 @@ function MergeModelList({ models, selectedModels, onModelToggle, onPercentageCha
                     />
                     <div>
                       <div className="font-medium text-slate-800 dark:text-gray-200">
-                        {model.name || `Model ${model.slotIndex}`}
+                        {model.name || `${t('modelSettings.modelSlot')} ${model.slotIndex}`}
                       </div>
                       <div className="text-xs text-slate-500 dark:text-gray-400">
                         {model.embedder || 'Unknown'} • {model.samplingRate || 'Unknown'} Hz • {model.voiceChangerType || 'RVC'}{model.version || '1'}
@@ -124,7 +131,11 @@ function MergeModelList({ models, selectedModels, onModelToggle, onPercentageCha
                       min="0"
                       max="100"
                       value={percentage}
-                      onChange={(e) => onPercentageChange(model.slotIndex, Number(e.target.value))}
+                      onChange={(e) => {
+                        if (typeof model.slotIndex === 'number') {
+                          onPercentageChange(model.slotIndex, Number(e.target.value));
+                        }
+                      }}
                       className={CSS_CLASSES.range}
                     />
                     <div className="flex justify-between text-xs text-slate-500 dark:text-gray-400 mt-1 relative">
@@ -143,10 +154,10 @@ function MergeModelList({ models, selectedModels, onModelToggle, onPercentageCha
       {selectedModels.length > 0 && (
         <div className="pt-3 border-t border-slate-200 dark:border-gray-700">
           <div className="text-sm text-slate-600 dark:text-gray-400">
-            Selected models: {selectedModels.length}
+            {t('mergeLab.selectedModelsCount')}: {selectedModels.length}
           </div>
           <div className="text-xs text-slate-500 dark:text-gray-500 mt-1">
-            Total weight: {selectedModels.reduce((sum, m) => sum + m.percentage, 0)}%
+            {t('mergeLab.totalWeight')}: {selectedModels.reduce((sum, m) => sum + m.percentage, 0)}%
           </div>
         </div>
       )}

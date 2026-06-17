@@ -5,10 +5,12 @@ import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEn
 import { arrayMove, SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AudioEffect, AudioChannel } from '@dannadori/voice-changer-client-js';
+import { AudioEffect } from './EffectConfig';
+import { AudioChannel } from './AddEffectModal';
 import { getEffectDefinition } from './serverEffectsUtils';
 import AddEffectModal from './AddEffectModal';
 import { CSS_CLASSES } from '../../styles/constants';
+import { useTranslation } from 'react-i18next';
 
 export type AudioEffectWithIndex = AudioEffect & { index: number };
 
@@ -33,6 +35,7 @@ function SortableEffectItem({ effect, isSelected, onSelect, onDelete, onToggle, 
   onToggle: () => void;
   serverSchema?: any;
 }) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: effect.index.toString() });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -44,14 +47,16 @@ function SortableEffectItem({ effect, isSelected, onSelect, onDelete, onToggle, 
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-6 h-6 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 rounded-full text-xs font-medium">{effect.index + 1}</div>
-          <button {...attributes} {...listeners} className={`${CSS_CLASSES.iconButton} cursor-grab active:cursor-grabbing`} title="Drag to reorder" onClick={(e) => e.stopPropagation()}>
+          <button {...attributes} {...listeners} className={`${CSS_CLASSES.iconButton} cursor-grab active:cursor-grabbing`} title={t('audioEffects.dragToReorder')} onClick={(e) => e.stopPropagation()}>
             <FontAwesomeIcon icon={faGripVertical} className="h-4 w-4" />
           </button>
-          <button onClick={(e) => { e.stopPropagation(); onToggle(); }} className={`${CSS_CLASSES.iconButton} ${effect.enabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-gray-500'}`} title={effect.enabled ? 'Disable' : 'Enable'}>
+          <button onClick={(e) => { e.stopPropagation(); onToggle(); }} className={`${CSS_CLASSES.iconButton} ${effect.enabled ? 'text-green-600 dark:text-green-400' : 'text-slate-400 dark:text-gray-500'}`} title={effect.enabled ? t('audioEffects.disable') : t('audioEffects.enable')}>
             <FontAwesomeIcon icon={faVolumeUp} className={`h-4 w-4 ${effect.enabled ? '' : 'opacity-40'}`} />
           </button>
           <div>
-            <div className="font-medium text-slate-700 dark:text-gray-200 text-sm">{getEffectDefinition(effect.type, serverSchema)?.name || effect.type}</div>
+            <div className="font-medium text-slate-700 dark:text-gray-200 text-sm">
+              {t(`effectsDefinition.${effect.type}.name`, { defaultValue: getEffectDefinition(effect.type, serverSchema)?.name || effect.type })}
+            </div>
             <div className="text-xs text-slate-500 dark:text-gray-400 flex items-center space-x-2">
               <span className="capitalize">{effect.type}</span>
               {getEffectDefinition(effect.type, serverSchema)?.provider && (
@@ -60,7 +65,7 @@ function SortableEffectItem({ effect, isSelected, onSelect, onDelete, onToggle, 
             </div>
           </div>
         </div>
-        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className={`${CSS_CLASSES.iconButton} text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300`} title="Delete">
+        <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className={`${CSS_CLASSES.iconButton} text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300`} title={t('audioEffects.deleteEffect')}>
           <FontAwesomeIcon icon={faTrash} className="h-4 w-4" />
         </button>
       </div>
@@ -69,6 +74,7 @@ function SortableEffectItem({ effect, isSelected, onSelect, onDelete, onToggle, 
 }
 
 export default function EffectsList({ channel, effects, selectedEffectIndex, onEffectSelect, onEffectAdd, onEffectDelete, onEffectToggle, onEffectReorder, serverSchema, providersInfo }: Props): JSX.Element {
+  const { t } = useTranslation();
   const [showAddModal, setShowAddModal] = useState(false);
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const channelEffects = useMemo(() => (effects || []).slice().sort((a, b) => a.index - b.index), [effects]);
@@ -94,11 +100,11 @@ export default function EffectsList({ channel, effects, selectedEffectIndex, onE
     <div className="flex flex-col h-full"> 
       <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-200 dark:border-gray-600"> 
         <div>
-          <h5 className="font-medium text-slate-700 dark:text-gray-200">{channel === 'input' ? 'Input' : 'Output'} Chain</h5>
-          <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">Signal flows from top to bottom</div>
+          <h5 className="font-medium text-slate-700 dark:text-gray-200">{t(`audioEffects.${channel}`)} {t('audioEffects.chain')}</h5>
+          <div className="text-xs text-slate-500 dark:text-gray-400 mt-1">{t('audioEffects.signalFlowDirection')}</div>
         </div>
         <div className="relative">
-          <button onClick={() => setShowAddModal(true)} className={`${CSS_CLASSES.iconButton} text-green-600 dark:text-green-400`} title="Add Effect">
+          <button onClick={() => setShowAddModal(true)} className={`${CSS_CLASSES.iconButton} text-green-600 dark:text-green-400`} title={t('audioEffects.addEffect')}>
             <FontAwesomeIcon icon={faPlus} className="h-4 w-4" />
           </button>
         </div>
@@ -106,16 +112,16 @@ export default function EffectsList({ channel, effects, selectedEffectIndex, onE
 
       {channelEffects.length === 0 ? (
         <div className="text-center py-8 text-slate-500 dark:text-gray-400 text-sm"> 
-          No {channel} effects added yet.
+          {t('audioEffects.noEffectsAdded', { channel: t(`audioEffects.${channel}`) })}
           <br />
-          Click the + button to add an effect.
+          {t('audioEffects.clickAddPrompt')}
         </div>
       ) : (
         <div className="space-y-1"> 
           <div className="flex justify-center py-2"> 
             <div className="flex items-center space-x-2 px-3 py-2 bg-slate-100 dark:bg-gray-700 rounded-md"> 
               <FontAwesomeIcon icon={channel === 'input' ? faMicrophone : faCog} className={`h-4 w-4 ${channel === 'input' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'}`} />
-              <span className="text-xs text-slate-600 dark:text-gray-400 font-medium">{channel === 'input' ? 'Audio Input' : 'From Processing'}</span>
+              <span className="text-xs text-slate-600 dark:text-gray-400 font-medium">{channel === 'input' ? t('audioEffects.audioInputLabel') : t('audioEffects.fromProcessingLabel')}</span>
             </div>
           </div>
 
@@ -148,7 +154,7 @@ export default function EffectsList({ channel, effects, selectedEffectIndex, onE
           <div className="flex justify-center py-2"> 
             <div className="flex items-center space-x-2 px-3 py-2 bg-slate-100 dark:bg-gray-700 rounded-md"> 
               <FontAwesomeIcon icon={channel === 'input' ? faCog : faVolumeHigh} className={`h-4 w-4 ${channel === 'input' ? 'text-green-600 dark:text-green-400' : 'text-purple-600 dark:text-purple-400'}`} />
-              <span className="text-xs text-slate-600 dark:text-gray-400 font-medium">{channel === 'input' ? 'To Processing' : 'Audio Output'}</span>
+              <span className="text-xs text-slate-600 dark:text-gray-400 font-medium">{channel === 'input' ? t('audioEffects.toProcessingLabel') : t('audioEffects.audioOutputLabel')}</span>
             </div>
           </div>
         </div>

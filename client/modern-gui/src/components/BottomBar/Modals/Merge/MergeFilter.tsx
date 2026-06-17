@@ -2,7 +2,13 @@ import { JSX } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFilter } from '@fortawesome/free-solid-svg-icons';
 import { CSS_CLASSES } from '../../../../styles/constants';
-import { ModelInfoDict } from '@dannadori/voice-changer-client-js';
+import { useTranslation } from 'react-i18next';
+
+export type ModelInfoDict = Record<string, {
+  name?: string;
+  mandatory?: boolean;
+  [key: string]: any;
+}>;
 
 interface MergeFilterProps {
   embedders: ModelInfoDict;
@@ -25,6 +31,7 @@ function MergeFilter({
   setSearchText,
   onFilterChange
 }: MergeFilterProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
 
   const sampleRates = [32000, 40000, 48000];
@@ -48,7 +55,7 @@ function MergeFilter({
   return (
     <div className="space-y-4 p-4 bg-slate-50 dark:bg-gray-800/30 rounded-lg border border-slate-200 dark:border-gray-700">
       <div className="flex justify-between items-center mb-3">
-        <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">Filter Settings</h4>
+        <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">{t('mergeLab.filterSettings')}</h4>
         <FontAwesomeIcon
           icon={faFilter}
           className="h-4 w-4 text-slate-500 dark:text-gray-400"
@@ -57,19 +64,19 @@ function MergeFilter({
 
       <div className="space-y-4">
         <div>
-          <label className={CSS_CLASSES.label}>Search Models:</label>
+          <label className={CSS_CLASSES.label}>{t('mergeLab.searchModelsLabel')}</label>
           <input
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Search by model name..."
+            placeholder={t('mergeLab.searchPlaceholder')}
             className={CSS_CLASSES.input}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={CSS_CLASSES.label}>Sample Rate:</label>
+            <label className={CSS_CLASSES.label}>{t('mergeLab.sampleRateLabel')}</label>
             <select
               value={sampleRate}
               onChange={(e) => handleSampleRateChange(Number(e.target.value))}
@@ -84,7 +91,7 @@ function MergeFilter({
           </div>
 
           <div>
-            <label className={CSS_CLASSES.label}>Embedder:</label>
+            <label className={CSS_CLASSES.label}>{t('mergeLab.embedderLabel')}</label>
             <select
               value={selectedEmbedder}
               onChange={(e) => handleEmbedderChange(e.target.value)}
@@ -92,7 +99,7 @@ function MergeFilter({
               disabled={Object.keys(embedders).length === 0}
             >
               {Object.keys(embedders).length === 0 ? (
-                <option value="">No embedders available</option>
+                <option value="">{t('mergeLab.noEmbedders')}</option>
               ) : (
                 Object.entries(embedders).map(([key, embedderInfo]) => (
                   <option key={key} value={key}>

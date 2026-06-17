@@ -8,6 +8,7 @@ import AudioDevicesServer from './AudioDevicesServer';
 import AudioVolume from './AudioVolume';
 import AudioDevicesClient from './AudioDevicesClient';
 import { useAppState } from '../../context/AppContext';
+import { useTranslation } from 'react-i18next';
 
 interface AudioSettingsCardProps {
   dndAttributes?: Record<string, any>;
@@ -15,6 +16,7 @@ interface AudioSettingsCardProps {
 }
 
 function AudioSettingsCard({ dndAttributes, dndListeners }: AudioSettingsCardProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -37,7 +39,7 @@ function AudioSettingsCard({ dndAttributes, dndListeners }: AudioSettingsCardPro
     <div className={`p-4 border border-slate-200 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 transition-all duration-300 flex-1 min-h-0 flex flex-col ${isCollapsed ? 'h-auto' : 'overflow-y-auto'}`}>
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200 dark:border-gray-700">
         <div className="flex items-center">
-          <h4 className={CSS_CLASSES.heading}>Audio Settings</h4>
+          <h4 className={CSS_CLASSES.heading}>{t('audioSettings.title')}</h4>
         </div>
         <div className="flex space-x-1 items-center">
           <button

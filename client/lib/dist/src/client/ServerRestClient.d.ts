@@ -21,5 +21,5 @@ export declare class ServerRestClient {
     deleteSound: (soundId: string) => Promise<ServerInfo>;
     downloadPretrained: (model_key: string) => Promise<ServerInfo>;
     deletePretrained: (model_key: string) => Promise<ServerInfo>;
-    postVoice: (timestamp: number, buffer: ArrayBuffer) => Promise<any>;
+    postVoice: (timestamp: number, buffer: ArrayBufferLike) => Promise<any>;
 }

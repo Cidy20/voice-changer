@@ -3,14 +3,49 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import DragHandle from '../Helpers/DragHandle';
 import { CSS_CLASSES } from '../../styles/constants';
-import { AudioEffect, AudioChannel, AudioEffectsConfiguration, BackgroundSoundsUploadSetting, BackgroundTrack } from '@dannadori/voice-changer-client-js';
 import { createEffectFromServerSchema } from './serverEffectsUtils';
 import EffectsList, { AudioEffectWithIndex as CEffect } from './EffectsList';
 import EffectConfig from './EffectConfig';
 import { useAppState } from '../../context/AppContext';
-import BackgroundConfig from './BackgroundConfig';
+import BackgroundConfig, { BackgroundTrack } from './BackgroundConfig';
 import BackgroundList from './BackgroundList';
 import { useUIContext } from '../../context/UIContext';
+import { useTranslation } from 'react-i18next';
+
+export interface AudioEffect {
+  type: string;
+  channel: 'input' | 'output' | string;
+  enabled: boolean;
+  parameters: Record<string, any>;
+  id?: string;
+  name?: string;
+  [key: string]: any;
+}
+export type AudioChannel = 'input' | 'output';
+export type AudioEffectsConfiguration = any;
+export interface BackgroundSoundsUploadSetting {
+  file: { file: File; dir: string };
+  params: Record<string, any>;
+}
+
+interface ExtendedServerSetting {
+  audioEffects?: AudioEffect[];
+  audioBackgrounds?: BackgroundTrack[];
+  audioEffectsSchema?: any;
+  audioEffectsProviders?: any;
+  [key: string]: any;
+}
+
+interface ExtendedServerSettingState {
+  serverSetting?: ExtendedServerSetting;
+  isUploading?: boolean;
+  uploadBackgroundSound?: (data: BackgroundSoundsUploadSetting) => Promise<any>;
+  updateSoundInfo?: (id: string, key: string, value: string) => Promise<any>;
+  deleteSound?: (id: string) => Promise<any>;
+  reloadServerInfo?: () => Promise<any>;
+  updateServerSettings?: (data: any) => Promise<any>;
+  [key: string]: any;
+}
 
 // UI type with index for client-side management
 type AudioEffectWithIndex = AudioEffect & { index: number };
@@ -21,10 +56,11 @@ interface AudioEffectsCardProps {
 }
 
 function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- App State ----------------
   const appState = useAppState();
   const guiState = useUIContext();
-  const { serverSetting } = appState;
+  const serverSetting = appState.serverSetting as unknown as ExtendedServerSettingState;
   
   // ---------------- States ----------------
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -62,15 +98,15 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
         return effectData;
       });
 
-      await appState.serverSetting.updateServerSettings({
-        ...(appState.serverSetting.serverSetting || {}),
+      await serverSetting.updateServerSettings?.({
+        ...(serverSetting.serverSetting || {}),
         audioEffects: effectsConfig,
-      });
+      } as any);
     } catch (error) {
       console.error('Failed to update server effects:', error);
       await syncWithServer();
     }
-  }, [appState, syncWithServer]);
+  }, [serverSetting, syncWithServer]);
 
   // ---------------- Effects ----------------
   
@@ -149,12 +185,12 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
 
     // Upload main model files (model + optional index file)
     console.log('Uploading background sound with settings:', uploadSettingsData);
-    await appState.serverSetting.uploadBackgroundSound(uploadSettingsData);
+    await serverSetting.uploadBackgroundSound?.(uploadSettingsData);
     console.log('Background sound uploaded successfully.');
 
     // Notify user of successful upload and refresh server state
-    guiState.showError("Background sound uploaded successfully!", "Confirm");
-    await appState.serverSetting.reloadServerInfo();
+    guiState.showError(t('audioEffects.backgroundSoundUploadSuccess'), 'Confirm');
+    await serverSetting.reloadServerInfo?.();
   }
 
   const updateSoundInfo = async (id: string, key: string, value: any) => {
@@ -163,7 +199,7 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
     );
     setBgTracks(newList);
     const valueToSend = typeof value === 'object' ? JSON.stringify(value) : String(value);
-    serverSetting?.updateSoundInfo(id, key, valueToSend);
+    serverSetting?.updateSoundInfo?.(id, key, valueToSend);
   }
 
   const enableTrack = async (id: string) => {
@@ -171,14 +207,14 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
     if (!track) return;
     const updated = bgTracks.map(t => (t.id === id ? { ...t, enabled: !t.enabled } : t));
     setBgTracks(updated);
-    serverSetting.updateSoundInfo(id, 'enabled', String(!track.enabled));
+    serverSetting.updateSoundInfo?.(id, 'enabled', String(!track.enabled));
   }
 
   const deleteTrack = async (id: string) => {
     const filtered = bgTracks.filter(t => t.id !== id).map((t, i) => ({ ...t, order: i }));
     setBgTracks(filtered);
     if (selectedBgId === id) setSelectedBgId(null);
-    serverSetting.deleteSound(id);
+    serverSetting.deleteSound?.(id);
   }
     
 
@@ -198,14 +234,14 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
     <div className={`p-4 border border-slate-200 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 transition-all duration-300 flex-1 min-h-0 flex flex-col ${isCollapsed ? 'h-auto' : 'overflow-hidden'}`}>
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200 dark:border-gray-700">
         <div className="flex items-center space-x-3">
-          <h4 className={CSS_CLASSES.heading}>Audio Effects</h4>
+          <h4 className={CSS_CLASSES.heading}>{t('audioEffects.title')}</h4>
           <div className="flex items-center space-x-2">
             {/* Removed syncing badge to avoid slider overlap */}
             <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400 text-xs rounded-full">
-              {totalActiveEffects} Effects
+              {totalActiveEffects} {t('audioEffects.effects')}
             </span>
             <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-800 dark:text-indigo-400 text-xs rounded-full">
-              {totalActiveBackground} Background Tracks
+              {totalActiveBackground} {t('audioEffects.backgroundTracks')}
             </span>
           </div>
         </div>
@@ -213,11 +249,11 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
             className={CSS_CLASSES.iconButton}
-            title={isCollapsed ? "Expand" : "Collapse"}
+            title={isCollapsed ? t('aiSettings.expand') : t('aiSettings.collapse')}
           >
             <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} className="h-5 w-5" />
           </button>
-          <DragHandle attributes={dndAttributes} listeners={dndListeners} title="Drag" />
+          <DragHandle attributes={dndAttributes} listeners={dndListeners} title={t('audioEffects.drag')} />
         </div>
       </div>
 
@@ -238,7 +274,7 @@ function AudioEffectsCard({ dndAttributes, dndListeners }: AudioEffectsCardProps
                   }`}
                 >
                   <div className="flex items-center justify-center space-x-1">
-                    <span className="capitalize">{tab}</span>
+                    <span>{t(`audioEffects.${tab}`)}</span>
                   </div>
                 </button>
               ))}

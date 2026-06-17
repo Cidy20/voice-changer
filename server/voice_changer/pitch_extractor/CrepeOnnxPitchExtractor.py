@@ -3,6 +3,7 @@ import torch
 import onnxruntime
 from const import PitchExtractorType, F0_MIN, F0_MAX
 from voice_changer.common.deviceManager.DeviceManager import DeviceManager
+from voice_changer.common.OnnxLoader import safe_creation
 from voice_changer.pitch_extractor.PitchExtractor import PitchExtractor
 from voice_changer.pitch_extractor import onnxcrepe
 
@@ -17,7 +18,7 @@ class CrepeOnnxPitchExtractor(PitchExtractor):
             onnxProviderOptions,
         ) = DeviceManager.get_instance().get_onnx_execution_provider()
 
-        self.onnx_session = onnxruntime.InferenceSession(
+        self.onnx_session = safe_creation(
             file, providers=onnxProviders, provider_options=onnxProviderOptions
         )
 

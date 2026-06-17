@@ -3,6 +3,7 @@ import { RVCModelSlot } from '@dannadori/voice-changer-client-js';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { CSS_CLASSES } from '../../../../styles/constants';
+import { useTranslation } from 'react-i18next';
 
 interface MergeConfigurationProps {
   downloadModel: boolean;
@@ -23,6 +24,7 @@ function MergeConfiguration({
   setSaveToEmptySlot,
   emptySlots
 }: MergeConfigurationProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- Handlers ----------------
 
   // Handle merge slot change
@@ -51,7 +53,7 @@ function MergeConfiguration({
   return (
     <div className="space-y-4 p-4 bg-slate-50 dark:bg-gray-800/30 rounded-lg border border-slate-200 dark:border-gray-700">
       <div className="flex justify-between items-center">
-        <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">Merge Options</h4>
+        <h4 className="text-md font-medium text-slate-700 dark:text-gray-200">{t('mergeLab.mergeOptions')}</h4>
         <FontAwesomeIcon
           icon={faCog}
           className="h-4 w-4 text-slate-500 dark:text-gray-400"
@@ -68,7 +70,7 @@ function MergeConfiguration({
             className={CSS_CLASSES.checkbox}
           />
           <label htmlFor="download-model" className={CSS_CLASSES.label}>
-            Download merged model
+            {t('mergeLab.downloadMergedModel')}
           </label>
         </div>
 
@@ -81,7 +83,7 @@ function MergeConfiguration({
             className={CSS_CLASSES.checkbox}
           />
           <label htmlFor="save-merge-slot" className={CSS_CLASSES.label}>
-            Save to merge slot
+            {t('mergeLab.saveToMergeSlot')}
           </label>
         </div>
 
@@ -96,13 +98,13 @@ function MergeConfiguration({
               className={CSS_CLASSES.checkbox}
             />
             <label htmlFor="save-empty-slot" className={`${CSS_CLASSES.label} ${emptySlots.length === 0 ? 'text-slate-400 dark:text-gray-500' : ''}`}>
-              Save to empty slot (auto-select first available)
+              {t('mergeLab.saveToEmptySlot')}
             </label>
           </div>
 
           {emptySlots.length === 0 && (
             <div className="ml-6 text-xs text-slate-500 dark:text-gray-400">
-              No empty slots available
+              {t('mergeLab.noEmptySlotsAvailable')}
             </div>
           )}
         </div>

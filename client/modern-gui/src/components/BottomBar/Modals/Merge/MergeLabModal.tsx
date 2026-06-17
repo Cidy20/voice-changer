@@ -1,14 +1,25 @@
 import { useState, JSX } from 'react';
-import { ClientState, ModelFileKind, ModelUploadSetting, RVCModelSlot, VoiceChangerType } from '@dannadori/voice-changer-client-js';
+import { ClientState, ModelFileKind, ModelUploadSetting, RVCModelSlot, VoiceChangerType, ServerInfo } from '@dannadori/voice-changer-client-js';
 import { CSS_CLASSES } from '../../../../styles/constants';
 import GenericModal from '../../../Modals/GenericModal';
 import { UIContextType } from '../../../../context/UIContext';
 import MergeFilter from './MergeFilter';
 import MergeModelList from './MergeModelList';
 import MergeConfiguration from './MergeConfiguration';
+import { useTranslation } from 'react-i18next';
+import { ModelInfoDict } from './MergeFilter';
+
+interface ExtendedRVCModelSlot extends RVCModelSlot {
+  embedder?: string;
+  version?: string;
+}
+
+interface ExtendedServerInfo extends ServerInfo {
+  embedders?: ModelInfoDict;
+}
 
 interface ModelMergeInfo {
-  slot: RVCModelSlot;
+  slot: ExtendedRVCModelSlot;
   percentage: number;
 }
 
@@ -20,6 +31,7 @@ interface MergeLabModalProps {
 }
 
 function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLabModalProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
 
   const [sampleRate, setSampleRate] = useState<number>(40000);
@@ -35,10 +47,10 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
   // ---------------- Functions ----------------
 
   // Get filtered models
-  const getFilteredModels = (): RVCModelSlot[] => {
+  const getFilteredModels = (): ExtendedRVCModelSlot[] => {
     if (!appState.serverSetting.serverSetting.modelSlots) return [];
 
-    return appState.serverSetting.serverSetting.modelSlots.filter((slot: RVCModelSlot) => {
+    return (appState.serverSetting.serverSetting.modelSlots as any[]).filter((slot) => {
       if (!slot.name || slot.name.length === 0) return false;
 
       if (slot.samplingRate && slot.samplingRate !== sampleRate) return false;
@@ -48,20 +60,20 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
       if (searchText && !slot.name.toLowerCase().includes(searchText.toLowerCase())) return false;
 
       return true;
-    });
+    }) as ExtendedRVCModelSlot[];
   };
 
   // Get empty slots
-  const getEmptySlots = (): RVCModelSlot[] => {
+  const getEmptySlots = (): ExtendedRVCModelSlot[] => {
     if (!appState.serverSetting.serverSetting.modelSlots) return [];
 
-    return appState.serverSetting.serverSetting.modelSlots.filter((slot: RVCModelSlot) => {
+    return (appState.serverSetting.serverSetting.modelSlots as any[]).filter((slot) => {
       return !slot.name || slot.name.length === 0;
-    });
+    }) as ExtendedRVCModelSlot[];
   };
 
   // Get first empty slot
-  const getFirstEmptySlot = (): RVCModelSlot | null => {
+  const getFirstEmptySlot = (): ExtendedRVCModelSlot | null => {
     const emptySlots = getEmptySlots();
     return emptySlots.length > 0 ? emptySlots[0] : null;
   };
@@ -114,7 +126,7 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
 
         // Get a list of selected models for merging
         const validMergeElements = selectedModels.filter((x) => {
-          return x.percentage > 0;
+          return x.percentage > 0 && typeof x.slot.slotIndex === 'number';
         });
 
         // Start the merge process
@@ -122,12 +134,12 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
           voiceChangerType: VoiceChangerType.RVC,
           command: "mix",
           files: validMergeElements.map(x => ({
-            slotIndex: x.slot.slotIndex,
+            slotIndex: x.slot.slotIndex as number,
             strength: x.percentage / 100
           })),
         });
 
-        guiState.showError('Models merged successfully!', 'Confirm');
+        guiState.showError(t('mergeLab.mergeSuccess'), 'Confirm');
 
         // Fetch the merged model file once
         const response = await fetch("/tmp/merged.pth");
@@ -143,15 +155,16 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
           a.click();
           document.body.removeChild(a);
           URL.revokeObjectURL(url); // Clean up
-          guiState.showError('Models downloaded successfully!', 'Confirm');
+          guiState.showError(t('mergeLab.downloadSuccess'), 'Confirm');
         }
 
         // Upload to slot if requested
         if (saveToEmptySlot || saveToMergeSlot) {
-          let slotIndex = saveToEmptySlot ? getFirstEmptySlot() : 499;
+          const emptySlot = getFirstEmptySlot();
+          let slotIndex = saveToEmptySlot ? (emptySlot && typeof emptySlot.slotIndex === 'number' ? emptySlot.slotIndex : null) : 499;
 
-          if (saveToEmptySlot && !slotIndex) {
-            guiState.showError('No empty slots available for saving.', 'Error');
+          if (saveToEmptySlot && slotIndex === null) {
+            guiState.showError(t('mergeLab.errorNoEmptySlot'), 'Error');
             return;
           }
 
@@ -161,7 +174,7 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
           // Save the merged model to the specified slot
           const uploadSettingsData: ModelUploadSetting & { embedder: string } = {
             voiceChangerType: VoiceChangerType.RVC,
-            slot: saveToEmptySlot ? getFirstEmptySlot()?.slotIndex! : 499,
+            slot: slotIndex as number,
             files: [{ kind: "rvcModel" as ModelFileKind, file: mergedModelFile, dir: "" }],
             isSampleMode: false,
             sampleId: null,
@@ -170,15 +183,15 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
           };
 
           await appState.serverSetting.uploadModel(uploadSettingsData);
-          guiState.showError('Models uploaded successfully!', 'Confirm');
+          guiState.showError(t('mergeLab.uploadSuccess'), 'Confirm');
           handleClose();
         }
       } else {
-        guiState.showError('No action selected. Please select at least one action.', 'Error');
+        guiState.showError(t('mergeLab.errorNoAction'), 'Error');
       }
     } catch (error) {
       console.error('Error merging models:', error);
-      guiState.showError(`Error merging models: ${error instanceof Error ? error.message : String(error)}`, 'Error');
+      guiState.showError(`${t('mergeLab.errorMerging')}${error instanceof Error ? error.message : String(error)}`, 'Error');
     }
   };
 
@@ -186,21 +199,22 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
 
   const filteredModels = getFilteredModels();
   const emptySlots = getEmptySlots();
+  const serverSetting = appState.serverSetting.serverSetting as ExtendedServerInfo;
 
   return (
     <GenericModal
       isOpen={showMerge}
       onClose={handleClose}
-      title="Merge Lab"
+      title={t('bottomBar.mergeLab')}
       closeOnOutsideClick={false}
       primaryButton={{
-        text: `${appState.serverSetting.isUploading ? `Merging... (${appState.serverSetting.uploadProgress.toFixed(1)}%)` : 'Merge'}`,
+        text: `${appState.serverSetting.isUploading ? `${t('mergeLab.merging')} (${appState.serverSetting.uploadProgress.toFixed(1)}%)` : t('mergeLab.merge')}`,
         onClick: handleMerge,
         disabled: ((selectedModels.length === 0) || appState.serverSetting.isUploading),
         className: CSS_CLASSES.modalPrimaryButton,
       }}
       secondaryButton={{
-        text: 'Close',
+        text: t('mergeLab.close'),
         onClick: handleClose,
         className: CSS_CLASSES.modalSecondaryButton,
         disabled: appState.serverSetting.isUploading
@@ -208,7 +222,7 @@ function MergeLabModal({ appState, guiState, showMerge, setShowMerge }: MergeLab
     >
       <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-2">
         <MergeFilter
-          embedders={appState.serverSetting.serverSetting.embedders}
+          embedders={serverSetting.embedders || {}}
           sampleRate={sampleRate}
           setSampleRate={setSampleRate}
           selectedEmbedder={selectedEmbedder}

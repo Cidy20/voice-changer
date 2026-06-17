@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlayCircle, faStopCircle } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 interface PerformanceRecordingProps {
     isRecording: boolean;
@@ -10,6 +11,7 @@ interface PerformanceRecordingProps {
 }
 
 function PerformanceRecording({ isRecording, setIsRecording, recordedData, setRecordedData }: PerformanceRecordingProps) {
+    const { t } = useTranslation();
     // ---------------- Functions ----------------
 
     // Download log file
@@ -50,10 +52,10 @@ function PerformanceRecording({ isRecording, setIsRecording, recordedData, setRe
                 ? 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-green-500 hover:bg-green-600 text-white dark:bg-green-600 dark:hover:bg-green-700'
                 }`}
-            title={isRecording ? "Stop Recording & Download CSV" : "Start Recording Performance Log"}
+            title={isRecording ? t('performance.stopTitle') : t('performance.startTitle')}
         >
             <FontAwesomeIcon icon={isRecording ? faStopCircle : faPlayCircle} className="h-3 w-3" />
-            <span>{isRecording ? 'Stop' : 'Record'}</span>
+            <span>{isRecording ? t('performance.stopRecording') : t('performance.startRecording')}</span>
         </button>
     );
 }

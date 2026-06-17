@@ -11,7 +11,10 @@ import ServerInfoModal from './Modals/ServerInfoModal';
 import { CSS_CLASSES } from '../../styles/constants';
 import PassthroughConfirmModal from './Modals/PassthroughConfirmModal';
 
+import { useTranslation } from 'react-i18next';
+
 function BottomBar(): JSX.Element {
+  const { t, i18n } = useTranslation();
   // ---------------- States ----------------
   const { theme, toggleTheme } = useThemeContext();
   const appState = useAppState() as AppContextValue;
@@ -157,8 +160,8 @@ function BottomBar(): JSX.Element {
 
       <div className="h-20 min-h-[60px] bg-white dark:bg-gray-800 border-t border-slate-200 dark:border-gray-700 flex items-center justify-between px-4 py-2 flex-shrink-0 transition-colors duration-300">
         <div className="flex space-x-2">
-          <button onClick={() => setShowMerge(true)} className={CSS_CLASSES.modalSecondaryButton}>Merge Lab</button>
-          <button onClick={() => setShowSettings(true)} className={CSS_CLASSES.modalSecondaryButton}>Advanced Settings</button>
+          <button onClick={() => setShowMerge(true)} className={CSS_CLASSES.modalSecondaryButton}>{t('bottomBar.mergeLab')}</button>
+          <button onClick={() => setShowSettings(true)} className={CSS_CLASSES.modalSecondaryButton}>{t('bottomBar.advancedSettings')}</button>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -172,10 +175,10 @@ function BottomBar(): JSX.Element {
             ${uiContext.isConverting ? 'focus:ring-red-400' : 'focus:ring-green-400'}`}
           >
             <FontAwesomeIcon icon={uiContext.isConverting ? faStop : faPlay} />
-            <span>{uiContext.isConverting ? 'Stop Server' : 'Start Server'}</span>
+            <span>{uiContext.isConverting ? t('bottomBar.stopServer') : t('bottomBar.startServer')}</span>
           </button>
           <button
-            onClick={appState.serverSetting.serverSetting.passThrough ? disablePassThrough : () => setShowPassthroughConfirm(true)}
+            onClick={appState.serverSetting?.serverSetting?.passThrough ? disablePassThrough : () => setShowPassthroughConfirm(true)}
             className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 flex items-center space-x-2 
             ${appState.serverSetting?.serverSetting?.passThrough
                 ? 'bg-yellow-500 hover:bg-yellow-600 text-gray-900'
@@ -184,13 +187,23 @@ function BottomBar(): JSX.Element {
             ${appState.serverSetting?.serverSetting?.passThrough ? 'focus:ring-yellow-400' : 'focus:ring-gray-400'}`}
           >
             <FontAwesomeIcon icon={appState.serverSetting?.serverSetting?.passThrough ? faVolumeUp : faVolumeMute} />
-            <span>{appState.serverSetting?.serverSetting?.passThrough ? 'Passthrough ON' : 'Passthrough OFF'}</span>
+            <span>{appState.serverSetting?.serverSetting?.passThrough ? t('bottomBar.passthroughOn') : t('bottomBar.passthroughOff')}</span>
           </button>
         </div>
 
         <div className="flex items-center space-x-2">
-          <button onClick={() => setShowServerInfo(true)} className={CSS_CLASSES.modalSecondaryButton}>Server Info</button>
-          <button onClick={() => setShowClientInfo(true)} className={CSS_CLASSES.modalSecondaryButton}>Client Info</button>
+          <button onClick={() => setShowServerInfo(true)} className={CSS_CLASSES.modalSecondaryButton}>{t('bottomBar.serverInfo')}</button>
+          <button onClick={() => setShowClientInfo(true)} className={CSS_CLASSES.modalSecondaryButton}>{t('bottomBar.clientInfo')}</button>
+          
+          <select
+            value={(i18n && i18n.language && typeof i18n.language === 'string' && i18n.language.startsWith('zh')) ? 'zh' : 'en'}
+            onChange={(e) => i18n && i18n.changeLanguage && i18n.changeLanguage(e.target.value)}
+            className="bg-white dark:bg-gray-800 text-slate-700 dark:text-gray-200 border border-slate-200 dark:border-gray-700 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors duration-200 cursor-pointer h-9 hover:border-slate-300 dark:hover:border-gray-600"
+          >
+            <option value="en">English</option>
+            <option value="zh">简体中文</option>
+          </select>
+
           <button
             onClick={toggleTheme}
             className={CSS_CLASSES.modalSecondaryButton}

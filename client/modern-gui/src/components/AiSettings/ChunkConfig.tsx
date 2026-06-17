@@ -3,6 +3,7 @@ import { CSS_CLASSES } from "../../styles/constants";
 import DebouncedSlider from "../Helpers/DebouncedSlider";
 import { ClientState } from "@dannadori/voice-changer-client-js";
 import { UIContextType } from "../../context/UIContext";
+import { useTranslation } from "react-i18next";
 
 interface ChunkConfigProps {
     appState: ClientState;
@@ -10,6 +11,7 @@ interface ChunkConfigProps {
 }
 
 function ChunkConfig({ appState, uiState }: ChunkConfigProps) {
+    const { t } = useTranslation();
     // ---------------- States ----------------
     const [localChunkSize, setLocalChunkSize] = useState<number>(
         appState.serverSetting?.serverSetting?.serverReadChunkSize
@@ -61,7 +63,7 @@ function ChunkConfig({ appState, uiState }: ChunkConfigProps) {
     return (
         <>
             <div>
-                <label htmlFor="chunk" className={CSS_CLASSES.label}>Chunk Size:</label>
+                <label htmlFor="chunk" className={CSS_CLASSES.label}>{t('aiSettings.chunk')}:</label>
                 <DebouncedSlider
                     id="chunk"
                     name="chunk"
@@ -77,7 +79,7 @@ function ChunkConfig({ appState, uiState }: ChunkConfigProps) {
                 <p className={CSS_CLASSES.sliderValue}>{((localChunkSize * 128 * 1000) / 48000).toFixed(1)}ms</p>
             </div>
             <div>
-                <label htmlFor="extra" className={CSS_CLASSES.label}>Extra Processing Time (Extra):</label>
+                <label htmlFor="extra" className={CSS_CLASSES.label}>{t('aiSettings.extra')}:</label>
                 <DebouncedSlider
                     id="extra"
                     name="extra"

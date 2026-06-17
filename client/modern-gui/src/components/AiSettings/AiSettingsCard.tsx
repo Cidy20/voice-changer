@@ -7,6 +7,7 @@ import { useUIContext } from '../../context/UIContext';
 import { useIndexedDB } from '@dannadori/voice-changer-client-js';
 import { CSS_CLASSES } from '../../styles/constants';
 import { useAppRoot } from '../../context/AppRootProvider';
+import { useTranslation } from 'react-i18next';
 import NoiseReduction from './NoiseReduction';
 import F0Extraction from './F0Extraction';
 import ChunkConfig from './ChunkConfig';
@@ -20,6 +21,7 @@ interface AiSettingsCardProps {
 }
 
 function AiSettingsCard({ dndAttributes, dndListeners }: AiSettingsCardProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const uiState = useUIContext();
@@ -33,7 +35,7 @@ function AiSettingsCard({ dndAttributes, dndListeners }: AiSettingsCardProps): J
   return (
     <div className={`p-4 border border-slate-200 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 transition-all duration-300 flex-1 min-h-0 flex flex-col ${isCollapsed ? 'h-auto' : 'overflow-y-auto'}`}>
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200 dark:border-gray-700">
-        <h4 className={CSS_CLASSES.heading}>AI Settings</h4>
+        <h4 className={CSS_CLASSES.heading}>{t('aiSettings.title')}</h4>
         <div className="flex space-x-1 items-center">
           <button onClick={() => setIsCollapsed(!isCollapsed)} className={CSS_CLASSES.iconButton} title={isCollapsed ? "Expand" : "Collapse"}>
             <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} className="h-5 w-5" />

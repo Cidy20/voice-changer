@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronUp, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { RVCModelSlot, ClientState } from '@dannadori/voice-changer-client-js';
 import { useAppState } from '../../context/AppContext';
+import { useTranslation } from 'react-i18next';
 import DragHandle from '../Helpers/DragHandle';
 import { CSS_CLASSES } from '../../styles/constants';
 import { useInitialPlaceholder } from '../../scripts/usePlaceholder';
@@ -15,6 +16,7 @@ interface ModelSettingsCardProps {
 }
 
 function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- State ----------------
   const appState = useAppState() as ClientState;
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -28,7 +30,7 @@ function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardPro
 
   // Update model state when modelSlotIndex or model_dir changes
   useEffect(() => {
-    setModel(appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex]);
+    setModel(appState.serverSetting.serverSetting.modelSlots[appState.serverSetting.serverSetting.modelSlotIndex as number] as RVCModelSlot);
   }, [appState.serverSetting?.serverSetting?.modelSlotIndex, appState.serverSetting?.serverSetting?.modelSlots]);
 
   // ---------------- Handler ----------------
@@ -46,7 +48,7 @@ function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardPro
     appState.serverSetting.updateServerSettings({
       ...appState.serverSetting.serverSetting,
       formantShift: val
-    });
+    } as any);
   };
 
   // Handle index ratio change
@@ -75,7 +77,7 @@ function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardPro
   return (
     <div className={`p-4 border border-slate-200 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 transition-all duration-300 flex-1 min-h-0 flex flex-col ${isCollapsed ? 'h-auto' : ''}`}>
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200 dark:border-gray-700">
-        <h4 className="text-lg font-semibold text-slate-800 dark:text-gray-200">Model Settings</h4>
+        <h4 className="text-lg font-semibold text-slate-800 dark:text-gray-200">{t('modelSettings.title')}</h4>
         <div className="flex space-x-1 items-center">
           <button onClick={() => setIsCollapsed(!isCollapsed)} className={`${CSS_CLASSES.iconButton} focus:ring-blue-500`} title={isCollapsed ? "Expand" : "Collapse"}>
             <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} className="h-5 w-5" />
@@ -92,7 +94,11 @@ function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardPro
             />
           ) : (
             <div className="flex items-center justify-center mb-6 p-8 bg-slate-200 dark:bg-gray-700/50 rounded-lg min-h-[160px]">
-              <p className="text-slate-600 dark:text-gray-400 italic text-center">Select a model from the list <br /> to see its settings.</p>
+              <p className="text-slate-600 dark:text-gray-400 italic text-center">
+                {t('modelSettings.selectModelPrompt').split('\n').map((line, i) => (
+                  <span key={i}>{line}<br /></span>
+                ))}
+              </p>
             </div>
           )}
           {
@@ -114,7 +120,7 @@ function ModelSettingsCard({ dndAttributes, dndListeners }: ModelSettingsCardPro
           onClick={handleSaveSettings}
           className={CSS_CLASSES.modalSecondaryButton}
         >
-          Save Settings
+          {t('modelSettings.saveSettings')}
         </button>
       </div>
     </div>

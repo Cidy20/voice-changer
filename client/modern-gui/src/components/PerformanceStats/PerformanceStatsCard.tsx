@@ -8,6 +8,7 @@ import PerformanceStats from './PerformanceStats';
 import PerformanceHistory from './PerformanceHistory';
 import PerformanceGraph from './PerformanceGraph';
 import { CSS_CLASSES } from '../../styles/constants';
+import { useTranslation } from 'react-i18next';
 
 // Define types for the performance data
 interface PerformanceMetrics {
@@ -49,7 +50,14 @@ interface RecordedDataEntry extends CalculatedMetricValues {
 // Default max data points for the chart
 const DEFAULT_MAX_CHART_DATA_POINTS = 50;
 
+interface ExtendedPerformanceData {
+  vol?: number;
+  responseTime: number;
+  mainprocessTime: number;
+}
+
 function PerformanceStatsCard({ dndAttributes, dndListeners }: PerformanceStatsCardProps): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
 
@@ -64,23 +72,24 @@ function PerformanceStatsCard({ dndAttributes, dndListeners }: PerformanceStatsC
 
   //Calculate the next DataPoint using appState performance values
   const calculatedMetrics = useMemo((): CalculatedMetricValues => {
-    const volumeDb = Math.max(Math.round(20 * Math.log10(appState.performance.vol || 0.00001)), -90);
+    const performance = appState.performance as unknown as ExtendedPerformanceData;
+    const volumeDb = Math.max(Math.round(20 * Math.log10(performance.vol || 0.00001)), -90);
     const chunkTime = ((appState.serverSetting.serverSetting.serverReadChunkSize * 128 * 1000) / 48000); // Assuming 48kHz sample rate, 128 samples per frame for chunk size unit
-    const totalLatencyTime = Math.ceil(chunkTime + appState.performance.responseTime + appState.serverSetting.serverSetting.crossFadeOverlapSize * 1000);
+    const totalLatencyTime = Math.ceil(chunkTime + performance.responseTime + appState.serverSetting.serverSetting.crossFadeOverlapSize * 1000);
 
     let perfStatus: PerfStatus = 'good';
     const eightyPercentChunkTime = 0.8 * chunkTime;
-    if (appState.performance.mainprocessTime > chunkTime) {
+    if (performance.mainprocessTime > chunkTime) {
       perfStatus = 'critical';
-    } else if (appState.performance.mainprocessTime > eightyPercentChunkTime) { // totalLatencyTime <= chunkTime is implicit
+    } else if (performance.mainprocessTime > eightyPercentChunkTime) { // totalLatencyTime <= chunkTime is implicit
       perfStatus = 'warning';
     }
 
     return {
       volumeDb,
-      ping: appState.performance.responseTime,
+      ping: performance.responseTime,
       totalLatencyTime,
-      perfTime: appState.performance.mainprocessTime,
+      perfTime: performance.mainprocessTime,
       chunkTime,
       perfStatus,
     };
@@ -125,7 +134,7 @@ function PerformanceStatsCard({ dndAttributes, dndListeners }: PerformanceStatsC
   return (
     <div className={`p-4 border border-slate-200 dark:border-gray-700 rounded-md shadow-sm bg-white dark:bg-gray-800 transition-all duration-300 flex-1 min-h-0 flex flex-col ${isCollapsed ? 'h-auto' : ''}`}>
       <div className="flex justify-between items-center mb-3 pb-2 border-b border-slate-200 dark:border-gray-700">
-        <h5 className="text-lg font-semibold text-slate-700 dark:text-gray-200">Performance Stats</h5>
+        <h5 className="text-lg font-semibold text-slate-700 dark:text-gray-200">{t('performance.title')}</h5>
         <div className="flex space-x-1 items-center">
           <button onClick={() => setIsCollapsed(!isCollapsed)} className={CSS_CLASSES.iconButton} title={isCollapsed ? "Expand" : "Collapse"}>
             <FontAwesomeIcon icon={isCollapsed ? faChevronDown : faChevronUp} className="h-5 w-5" />

@@ -349,7 +349,7 @@ export class ServerRestClient {
 
     // VoiceChangerWorkletNodeから呼び出される
     //// Restで音声変換
-    postVoice = async (timestamp: number, buffer: ArrayBuffer) => {
+    postVoice = async (timestamp: number, buffer: ArrayBufferLike) => {
         const url = this.serverUrl + "/test";
 
         const body = pack([timestamp, buffer])
@@ -359,7 +359,7 @@ export class ServerRestClient {
                 Accept: "application/octet-stream",
                 "Content-Type": "application/octet-stream",
             },
-            body,
+            body: body as any,
         });
         const data = new Uint8Array(await res.arrayBuffer());
 

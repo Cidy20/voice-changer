@@ -1,10 +1,12 @@
 import { JSX, useState, useMemo } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFilter } from '@fortawesome/free-solid-svg-icons';
-import { AudioChannel } from '@dannadori/voice-changer-client-js';
 import { getAvailableEffectTypesFromServer } from './serverEffectsUtils';
+
+export type AudioChannel = 'input' | 'output';
 import { CSS_CLASSES } from '../../styles/constants';
 import GenericModal from '../Modals/GenericModal';
+import { useTranslation } from 'react-i18next';
 
 interface AddEffectModalProps {
   isOpen: boolean;
@@ -23,6 +25,7 @@ function AddEffectModal({
   serverSchema,
   providersInfo 
 }: AddEffectModalProps): JSX.Element {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProvider, setSelectedProvider] = useState<string>('all');
 
@@ -84,17 +87,17 @@ function AddEffectModal({
     <GenericModal
       isOpen={isOpen}
       onClose={handleClose}
-      title="Add Audio Effect"
+      title={t('audioEffects.addAudioEffect')}
       size="large"
       secondaryButton={{
-        text: "Cancel",
+        text: t('audioEffects.cancel'),
         onClick: handleClose
       }}
     >
       <div className="space-y-4">
         {/* Subtitle */}
         <p className="text-sm text-slate-500 dark:text-gray-400">
-          Choose an effect for the <span className="font-medium capitalize">{channel}</span> channel
+          {t('audioEffects.chooseEffectPrompt', { channel: t(`audioEffects.${channel}`) })}
         </p>
 
         {/* Search and Filter */}
@@ -107,7 +110,7 @@ function AddEffectModal({
             />
             <input
               type="text"
-              placeholder="Search effects..."
+              placeholder={t('audioEffects.searchEffectsPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`${CSS_CLASSES.input} pl-10`}
@@ -125,12 +128,12 @@ function AddEffectModal({
               onChange={(e) => setSelectedProvider(e.target.value)}
               className={`${CSS_CLASSES.select} flex-1`}
             >
-              <option value="all">All Providers ({availableEffects.length} effects)</option>
+              <option value="all">{t('audioEffects.allProviders', { count: availableEffects.length })}</option>
               {providers.map((provider: any) => {
                 const providerEffects = availableEffects.filter(effect => effect.provider === provider.name);
                 return (
                   <option key={provider.name} value={provider.name}>
-                    {provider.name} ({providerEffects.length} effects)
+                    {provider.name} ({t('audioEffects.effectsCount', { count: providerEffects.length })})
                   </option>
                 );
               })}
@@ -142,9 +145,9 @@ function AddEffectModal({
         <div className="max-h-96 overflow-y-auto">
           {filteredEffects.length === 0 ? (
             <div className="text-center py-8 text-slate-500 dark:text-gray-400">
-              <p>No effects found</p>
+              <p>{t('audioEffects.noEffectsFound')}</p>
               {searchTerm && (
-                <p className="text-sm mt-2">Try adjusting your search terms</p>
+                <p className="text-sm mt-2">{t('audioEffects.adjustSearchTerms')}</p>
               )}
             </div>
           ) : selectedProvider === 'all' ? (
@@ -153,7 +156,7 @@ function AddEffectModal({
               {Object.entries(effectsByProvider).map(([provider, effects]) => (
                 <div key={provider} className="space-y-3">
                   <h4 className="font-medium text-slate-600 dark:text-gray-300 text-sm uppercase tracking-wider">
-                    {provider} ({effects.length})
+                    {provider} ({t('audioEffects.effectsCount', { count: effects.length })})
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {effects.map((effect) => (
@@ -183,7 +186,7 @@ function AddEffectModal({
 
         {/* Footer Info */}
         <div className="text-sm text-slate-500 dark:text-gray-400 text-center pt-3 border-t border-slate-200 dark:border-gray-600">
-          {filteredEffects.length} of {availableEffects.length} effects shown
+          {t('audioEffects.effectsShownCount', { shown: filteredEffects.length, total: availableEffects.length })}
         </div>
       </div>
     </GenericModal>
@@ -201,6 +204,11 @@ interface EffectCardProps {
 }
 
 function EffectCard({ effect, onAdd }: EffectCardProps): JSX.Element {
+  const { t } = useTranslation();
+  const effectKey = effect.type;
+  const translatedName = t(`effectsDefinition.${effectKey}.name`, { defaultValue: effect.name });
+  const translatedDesc = t(`effectsDefinition.${effectKey}.description`, { defaultValue: effect.description });
+
   return (
     <button
       onClick={onAdd}
@@ -209,10 +217,10 @@ function EffectCard({ effect, onAdd }: EffectCardProps): JSX.Element {
       <div className="flex items-start justify-between">
         <div className="flex-1 min-w-0">
           <h5 className="font-medium text-slate-700 dark:text-gray-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-            {effect.name}
+            {translatedName}
           </h5>
           <p className="text-sm text-slate-500 dark:text-gray-400 mt-1 break-words">
-            {effect.description}
+            {translatedDesc}
           </p>
           {effect.provider && (
             <span className="inline-block mt-2 px-2 py-1 bg-slate-100 dark:bg-gray-700 text-slate-600 dark:text-gray-300 rounded text-xs">

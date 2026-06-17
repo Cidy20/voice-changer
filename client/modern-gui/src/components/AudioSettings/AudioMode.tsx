@@ -4,8 +4,10 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { useUIContext } from "../../context/UIContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 function AudioMode({ audioState, setAudioState }: { audioState: "client" | "server"; setAudioState: Dispatch<SetStateAction<"client" | "server">>; }): JSX.Element {
+  const { t } = useTranslation();
   // ---------------- States ----------------
   const appState = useAppState();
   const uiContext = useUIContext();
@@ -56,13 +58,15 @@ function AudioMode({ audioState, setAudioState }: { audioState: "client" | "serv
     // Update warning message
     const messages = [];
     if (!isClientAudioAvailable) {
-      messages.push("Client audio not available");
+      messages.push(t('audioSettings.clientAudioNotAvailable'));
     }
     if (!isServerAudioAvailable) {
-      messages.push("Server audio not available");
+      messages.push(t('audioSettings.serverAudioNotAvailable'));
     }
-    setWarningMessage(messages.length > 0 ? messages.join(" and ") + "." : null);
-  }, [isClientAudioAvailable, isServerAudioAvailable, appState.serverSetting, setAudioState, audioState]);
+    const andWord = t('audioSettings.client') === 'Client' ? " and " : " 和 ";
+    const dotWord = t('audioSettings.client') === 'Client' ? "." : "。";
+    setWarningMessage(messages.length > 0 ? messages.join(andWord) + dotWord : null);
+  }, [isClientAudioAvailable, isServerAudioAvailable, appState.serverSetting, setAudioState, audioState, t]);
 
   // ---------------- Handlers ----------------
 
@@ -92,7 +96,7 @@ function AudioMode({ audioState, setAudioState }: { audioState: "client" | "serv
     <div className="space-y-4">
       <div className="pb-2 border-b border-slate-200 dark:border-gray-700">
         <div className="flex items-center mb-2">
-          <label className="block text-sm font-medium text-slate-700 dark:text-gray-300">Audio Processing</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-gray-300">{t('audioSettings.audioProcessing')}</label>
           {warningMessage && (
             <div className="ml-2 relative group">
               <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-500" />
@@ -112,7 +116,7 @@ function AudioMode({ audioState, setAudioState }: { audioState: "client" | "serv
                 onChange={handleClientRadioChange}
                 disabled={!isClientAudioAvailable || uiContext.isConverting}
               />
-              Client
+              {t('audioSettings.client')}
             </label>
             <label className={`${CSS_CLASSES.radioLabel} ${!isServerAudioAvailable ? "opacity-50 cursor-not-allowed" : ""}`}>
               <input
@@ -122,7 +126,7 @@ function AudioMode({ audioState, setAudioState }: { audioState: "client" | "serv
                 onChange={handleServerRadioChange}
                 disabled={!isServerAudioAvailable || uiContext.isConverting}
               />
-              Server
+              {t('audioSettings.server')}
             </label>
           </div>
           {audioState === "client" && (
@@ -131,13 +135,13 @@ function AudioMode({ audioState, setAudioState }: { audioState: "client" | "serv
               className="px-3 py-1 text-xs bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:hover:bg-gray-400 text-white rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={uiContext.isConverting || appState.serverSetting.serverSetting.serverAudioStated === 1}
             >
-              Reload Device List
+              {t('audioSettings.reloadDeviceList')}
             </button>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default AudioMode;

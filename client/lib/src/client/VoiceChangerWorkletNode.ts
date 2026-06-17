@@ -221,7 +221,7 @@ export class VoiceChangerWorkletNode extends AudioWorkletNode {
     }
   }
 
-  private sendBuffer = async (newBuffer: ArrayBuffer) => {
+  private sendBuffer = async (newBuffer: ArrayBufferLike) => {
     const timestamp = Date.now();
     if (this.setting.protocol === "sio") {
       if (!this.socket) {
