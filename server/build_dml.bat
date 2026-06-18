@@ -9,11 +9,14 @@ echo.
 REM Set environment variable for DML backend
 set BACKEND=dml
 
+set "SCRIPT_DIR=%~dp0"
+set "PROJECT_DIR=%SCRIPT_DIR%.."
+
 REM Check if dist directory exists
-if not exist "..\client\modern-gui\dist" (
-    echo Error: Frontend dist not found at ..\client\modern-gui\dist
+if not exist "%PROJECT_DIR%\client\modern-gui\dist" (
+    echo Error: Frontend dist not found at %PROJECT_DIR%\client\modern-gui\dist
     echo Please build the frontend first:
-    echo   cd ..\client\modern-gui
+    echo   cd %PROJECT_DIR%\client\modern-gui
     echo   npm install
     echo   npm run build
     pause
@@ -23,7 +26,8 @@ if not exist "..\client\modern-gui\dist" (
 echo Using DML backend, frontend dist found.
 echo.
 
-REM Clean previous build
+cd /d "%SCRIPT_DIR%"
+
 if exist "dist" (
     echo Cleaning previous build...
     rmdir /s /q dist
@@ -32,11 +36,10 @@ if exist "build" (
     rmdir /s /q build
 )
 
-REM Run PyInstaller
 echo Building executable... This may take 10-20 minutes.
 echo.
 
-& "d:\AI_ollama\voice-changer\.conda\python.exe" -m PyInstaller --clean -y --dist ./dist --workpath ./build MMVCServerSIO.spec
+"d:\AI_ollama\voice-changer\.conda\python.exe" -m PyInstaller --clean -y --dist ./dist --workpath ./build MMVCServerSIO.spec
 
 if %errorlevel% neq 0 (
     echo.
