@@ -23,7 +23,8 @@ class VoiceChangerV2:
         # 初期化
         self.settings = settings
 
-        self.block_frame = self.settings.serverReadChunkSize * 128
+        self.block_frame = int((self.settings.serverReadChunkSize * 128 / 48000) * self.settings.inputSampleRate)
+        self.block_frame = ((self.block_frame + 127) // 128) * 128
         self.crossfade_frame = int(self.settings.crossFadeOverlapSize * self.settings.inputSampleRate)
         self.extra_frame = int(self.settings.extraConvertSize * self.settings.inputSampleRate)
         self.sola_search_frame = self.settings.inputSampleRate // 100
@@ -61,6 +62,8 @@ class VoiceChangerV2:
     def set_input_sample_rate(self):
         self.io_recorder.open(self.settings.inputSampleRate, self.settings.outputSampleRate)
 
+        self.block_frame = int((self.settings.serverReadChunkSize * 128 / 48000) * self.settings.inputSampleRate)
+        self.block_frame = ((self.block_frame + 127) // 128) * 128
         self.extra_frame = int(self.settings.extraConvertSize * self.settings.inputSampleRate)
         self.crossfade_frame = int(self.settings.crossFadeOverlapSize * self.settings.inputSampleRate)
         self.sola_search_frame = self.settings.inputSampleRate // 100
@@ -81,7 +84,8 @@ class VoiceChangerV2:
 
     def update_settings(self, key: str, val: Any, old_val: Any):
         if key == "serverReadChunkSize":
-            self.block_frame = self.settings.serverReadChunkSize * 128
+            self.block_frame = int((self.settings.serverReadChunkSize * 128 / 48000) * self.settings.inputSampleRate)
+            self.block_frame = ((self.block_frame + 127) // 128) * 128
         elif key == 'gpu':
             # When changing GPU, need to re-allocate fade-in/fade-out buffers on different device
             self._generate_strength()
@@ -97,7 +101,7 @@ class VoiceChangerV2:
 
         if self.vcmodel is not None:
             self.vcmodel.update_settings(key, val, old_val)
-            if key in {'gpu', 'serverReadChunkSize', 'extraConvertSize', 'crossFadeOverlapSize', 'silenceFront', 'forceFp32'}:
+            if key in {'gpu', 'serverReadChunkSize', 'inputSampleRate', 'extraConvertSize', 'crossFadeOverlapSize', 'silenceFront', 'forceFp32'}:
                 self.vcmodel.realloc(self.block_frame, self.extra_frame, self.crossfade_frame, self.sola_search_frame)
 
 
@@ -129,7 +133,7 @@ class VoiceChangerV2:
 
     def process_audio(self, audio_in: AudioInOutFloat) -> tuple[AudioInOutFloat, float]:
         # 强行对齐输入尺寸到标准块尺寸，防止由于网络包长抖动打乱 SOLA 拼接引起吞字和卡顿
-        target_size = self.settings.serverReadChunkSize * 128
+        target_size = self.block_frame
         if audio_in.shape[0] != target_size:
             if audio_in.shape[0] < target_size:
                 audio_in = np.pad(audio_in, (0, target_size - audio_in.shape[0]), mode='constant')

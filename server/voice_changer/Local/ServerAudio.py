@@ -77,6 +77,7 @@ class ServerAudio:
         try:
             out_wav = self._processDataWithTime(indata)
             outputChannels = outdata.shape[1]
+            out_wav = out_wav[:outdata.shape[0]]
             outdata[:] = (np.repeat(out_wav, outputChannels).reshape(-1, outputChannels) * self.settings.serverOutputAudioGain)
         except Exception as e:
             self.callbacks.emit_to(0, self.performance, ('ERR_GENERIC_SERVER_AUDIO_ERROR', ERR_GENERIC_SERVER_AUDIO_ERROR))
@@ -87,6 +88,7 @@ class ServerAudio:
             out_wav = self._processDataWithTime(indata)
             self.monQueue.put(out_wav)
             outputChannels = outdata.shape[1]
+            out_wav = out_wav[:outdata.shape[0]]
             outdata[:] = (np.repeat(out_wav, outputChannels).reshape(-1, outputChannels) * self.settings.serverOutputAudioGain)
         except Exception as e:
             self.callbacks.emit_to(0, self.performance, ('ERR_GENERIC_SERVER_AUDIO_ERROR', ERR_GENERIC_SERVER_AUDIO_ERROR))
