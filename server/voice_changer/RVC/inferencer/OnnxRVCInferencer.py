@@ -15,6 +15,7 @@ class OnnxRVCInferencer(Inferencer):
             onnxProviderOptions,
         ) = DeviceManager.get_instance().get_onnx_execution_provider(require_static=True)
         self.is_half = device_manager.use_fp16()
+        self.backend = device_manager.device_metadata.get('backend', 'cpu')
 
         self.set_props(EnumInferenceTypes.onnxRVC, file)
 
@@ -46,7 +47,7 @@ class OnnxRVCInferencer(Inferencer):
     ) -> torch.Tensor:
         assert pitch is not None or pitchf is not None, "Pitch or Pitchf is not found."
 
-        if feats.device.type == 'cuda':
+        if self.backend == 'cuda' and feats.device.type == 'cuda':
             binding = self.model.io_binding()
 
             binding.bind_input('feats', device_type='cuda', device_id=feats.device.index, element_type=self.fp_dtype_np, shape=tuple(feats.shape), buffer_ptr=feats.data_ptr())

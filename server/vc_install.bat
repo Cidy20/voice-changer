@@ -8,7 +8,13 @@ echo.
 
 REM Function to check if Python is available
 :check_python
-python --version >nul 2>&1
+set PYTHON_EXE=python
+py --version >nul 2>&1
+if %errorlevel% equ 0 (
+    set PYTHON_EXE=py
+)
+
+%PYTHON_EXE% --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo Error: Python is not installed or not in PATH
     echo Please install Python 3.8 or higher and try again
@@ -17,7 +23,7 @@ if %errorlevel% neq 0 (
 )
 
 REM Check Python version
-for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
+for /f "tokens=2" %%i in ('%PYTHON_EXE% --version 2^>^&1') do set PYTHON_VERSION=%%i
 for /f "tokens=1,2 delims=." %%a in ("%PYTHON_VERSION%") do (
     set PYTHON_MAJOR=%%a
     set PYTHON_MINOR=%%b
@@ -85,12 +91,19 @@ echo Selected backend: %BACKEND%
 echo.
 echo Creating virtual environment...
 
-if exist "venv" (
-    echo Virtual environment already exists. Removing old one...
-    rmdir /s /q venv
+set VENV_DIR=.venv
+if not exist "..\main.py" (
+    if exist "..\.venv" (
+        set VENV_DIR=..\.venv
+    )
 )
 
-python -m venv venv
+if exist "%VENV_DIR%" (
+    echo Virtual environment already exists. Removing old one...
+    rmdir /s /q "%VENV_DIR%"
+)
+
+%PYTHON_EXE% -m venv "%VENV_DIR%"
 if %errorlevel% neq 0 (
     echo Error: Failed to create virtual environment
     pause
@@ -98,7 +111,7 @@ if %errorlevel% neq 0 (
 )
 
 REM Activate virtual environment
-call venv\Scripts\activate.bat
+call "%VENV_DIR%\Scripts\activate.bat"
 if %errorlevel% neq 0 (
     echo Error: Failed to activate virtual environment
     pause
@@ -114,7 +127,7 @@ echo.
 echo Installing requirements...
 
 REM Upgrade pip first
-python -m pip install --upgrade pip
+%PYTHON_EXE% -m pip install --upgrade pip
 if %errorlevel% neq 0 (
     echo Warning: Failed to upgrade pip
 )

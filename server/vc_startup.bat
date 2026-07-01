@@ -8,13 +8,18 @@ echo.
 
 REM Function to check if virtual environment exists
 :check_venv
-if not exist "venv" (
-    echo Error: Virtual environment not found!
-    echo Please run the installation script first:
-    echo   install.bat
-    echo.
-    pause
-    exit /b 1
+if not exist ".venv" (
+    if not exist "..\.venv" (
+        echo Error: Virtual environment not found!
+        echo Please run the installation script first:
+        echo   vc_install.bat
+        echo.
+        pause
+        exit /b 1
+    )
+    set VENV_DIR=..\.venv
+) else (
+    set VENV_DIR=.venv
 )
 
 echo Virtual environment found
@@ -31,20 +36,6 @@ if not exist "main.py" (
 )
 
 echo Application file found
-goto activate_venv
-
-REM Function to activate virtual environment
-:activate_venv
-echo Activating virtual environment...
-
-call venv\Scripts\activate.bat
-if %errorlevel% neq 0 (
-    echo Error: Failed to activate virtual environment
-    pause
-    exit /b 1
-)
-
-echo Virtual environment activated
 goto start_app
 
 REM Function to start the application
@@ -54,8 +45,8 @@ echo Starting Voice Changer Server...
 echo Press Ctrl+C to stop the server
 echo.
 
-REM Start the application
-python main.py
+REM Start the application using the virtual environment's Python directly
+"%VENV_DIR%\Scripts\python.exe" main.py
 
 REM This will be reached when the server stops
 echo.

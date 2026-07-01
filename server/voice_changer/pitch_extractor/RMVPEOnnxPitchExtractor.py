@@ -17,6 +17,7 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
         device_manager = DeviceManager.get_instance()
         self.device = device_manager.device
         self.is_half = device_manager.use_fp16()
+        self.backend = device_manager.device_metadata.get('backend', 'cpu')
         (
             onnxProviders,
             onnxProviderOptions,
@@ -45,7 +46,7 @@ class RMVPEOnnxPitchExtractor(PitchExtractor):
     ) -> torch.Tensor:
         mel = self.mel_extractor(audio.unsqueeze(0).float())
 
-        if self.device.type == 'cuda':
+        if self.backend == 'cuda' and self.device.type == 'cuda':
             binding = self.onnx_session.io_binding()
 
             binding.bind_input('mel', device_type='cuda', device_id=self.device.index, element_type=self.fp_dtype_np, shape=tuple(mel.shape), buffer_ptr=mel.data_ptr())

@@ -6,6 +6,6 @@
     "tab.activeBackground": "#65952acc"
   },
   "basedpyright.analysis.typeCheckingMode": "off",
-  "python-envs.defaultEnvManager": "ms-python.python:conda",
-  "python-envs.defaultPackageManager": "ms-python.python:conda"
+  "python-envs.defaultEnvManager": "ms-python.python:venv",
+  "python-envs.defaultPackageManager": "ms-python.python:pip"
 }

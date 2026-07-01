@@ -10,7 +10,7 @@ faiss-cpu==1.14.3
 
 onnx==1.22.0
 onnxscript==0.2.6
-onnxruntime-directml==1.24.4
+onnxruntime-directml==1.20.0
 onnxslim==0.1.93
 torchcrepe==0.0.24
 torchfcpe==0.0.4

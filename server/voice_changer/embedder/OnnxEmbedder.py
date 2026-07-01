@@ -25,6 +25,7 @@ class OnnxEmbedder(Embedder):
         self.fp_dtype_t = torch.float16 if self.is_half else torch.float32
         self.fp_dtype_np = np.float16 if self.is_half else np.float32
         self.onnx_session = safe_creation(model.SerializeToString(), sess_options=so, providers=onnxProviders, provider_options=onnxProviderOptions)
+        self.backend = device_manager.device_metadata.get('backend', 'cpu')
         super().set_props(self.embedderType, file)
         return self
 
@@ -34,7 +35,7 @@ class OnnxEmbedder(Embedder):
         # Keep input tensor type match with model type (which is FP32)
         input_feats = feats.float()
 
-        if input_feats.device.type == 'cuda':
+        if self.backend == 'cuda' and input_feats.device.type == 'cuda':
             binding = self.onnx_session.io_binding()
 
             binding.bind_input('audio', device_type='cuda', device_id=input_feats.device.index, element_type=self.fp_dtype_np, shape=tuple(input_feats.shape), buffer_ptr=input_feats.data_ptr())

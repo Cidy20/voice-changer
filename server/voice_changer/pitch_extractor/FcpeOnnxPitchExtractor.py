@@ -18,6 +18,7 @@ class FcpeOnnxPitchExtractor(PitchExtractor):
         # NOTE: FCPE doesn't seem to be behave correctly in FP16 mode.
         # self.is_half = device_manager.use_fp16()
         self.is_half = False
+        self.backend = device_manager.device_metadata.get('backend', 'cpu')
         (
             onnxProviders,
             onnxProviderOptions,
@@ -54,7 +55,7 @@ class FcpeOnnxPitchExtractor(PitchExtractor):
     ) -> torch.Tensor:
         mel = self.mel_extractor(audio.unsqueeze(0).float())
 
-        if audio.device.type == 'cuda':
+        if self.backend == 'cuda' and audio.device.type == 'cuda':
             binding = self.onnx_session.io_binding()
 
             binding.bind_input('mel', device_type='cuda', device_id=audio.device.index, element_type=self.fp_dtype_np, shape=tuple(mel.shape), buffer_ptr=mel.contiguous().data_ptr())

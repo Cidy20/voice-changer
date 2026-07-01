@@ -144,11 +144,12 @@ class DeviceManager(object):
             "inter_op_num_threads": 8,
         }
         availableProviders = onnxruntime.get_available_providers()
-        if self.device.type == 'cuda' and "ROCMExecutionProvider" in availableProviders:
+        backend = self.device_metadata.get('backend', 'cpu')
+        if backend == 'cuda' and "ROCMExecutionProvider" in availableProviders:
             return ["ROCMExecutionProvider", "CPUExecutionProvider"], [{"device_id": self.device.index}, cpu_settings]
-        elif self.device.type == 'cuda' and "CUDAExecutionProvider" in availableProviders:
+        elif backend == 'cuda' and "CUDAExecutionProvider" in availableProviders:
             return ["CUDAExecutionProvider", "CPUExecutionProvider"], [{"device_id": self.device.index}, cpu_settings]
-        elif self.device.type == 'privateuseone' and "DmlExecutionProvider" in availableProviders:
+        elif backend == 'directml' and "DmlExecutionProvider" in availableProviders:
             return ["DmlExecutionProvider", "CPUExecutionProvider"], [{"device_id": self.device.index}, cpu_settings]
         elif 'CoreMLExecutionProvider' in availableProviders:
             is_new_ort = False

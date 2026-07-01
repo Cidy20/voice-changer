@@ -39,7 +39,7 @@ if exist "build" (
 echo Building executable... This may take 10-20 minutes.
 echo.
 
-"d:\AI_ollama\voice-changer\.conda\python.exe" -m PyInstaller --clean -y --dist ./dist --workpath ./build MMVCServerSIO.spec
+d:\AI_ollama\voice-changer\.venv\Scripts\python.exe -m PyInstaller --clean -y --dist ./dist --workpath ./build MMVCServerSIO.spec
 
 if %errorlevel% neq 0 (
     echo.
